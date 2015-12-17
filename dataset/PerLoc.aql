@@ -1,0 +1,6 @@
+create view Cap as
+  extract regex /[A-Z][a-z]*/
+    on D.text as Cap
+  from Document D;
+
+output view Cap;
