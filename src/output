@@ -1,23 +1,15 @@
-0
-Cap
-1
-Att
-0
-Stt
-1
-Was
 Processing PerLoc.input
 View: Cap
-+----------------------+---------------------+
-| Cap                  | Att                 |
-+----------------------+---------------------+
-| Carter:(0,6)         | arter:(1,6)         |
-| Plains:(12,18)       | lains:(13,18)       |
-| Georgia:(20,27)      | eorgia:(21,27)      |
-| Washington:(29,39)   | ashington:(30,39)   |
-| Westmoreland:(45,57) | estmoreland:(46,57) |
-| Virginia:(59,67)     | irginia:(60,67)     |
-+----------------------+---------------------+
++----------------------+
+| Cap                  |
++----------------------+
+| Carter:(0,6)         |
+| Plains:(12,18)       |
+| Georgia:(20,27)      |
+| Washington:(29,39)   |
+| Westmoreland:(45,57) |
+| Virginia:(59,67)     |
++----------------------+
 6 rows in set
 
 View: Stt
@@ -28,4 +20,14 @@ View: Stt
 | Washington:(29,39) |                 |
 | Virginia:(59,67)   |                 |
 +--------------------+-----------------+
+3 rows in set
+
+View: PerLocOnly
++--------------------+
+| PerLoc             |
++--------------------+
+| Georgia:(20,27)    |
+| Washington:(29,39) |
+| Virginia:(59,67)   |
++--------------------+
 3 rows in set

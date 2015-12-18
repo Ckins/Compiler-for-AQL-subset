@@ -34,6 +34,10 @@ class Parser {
     vector<GroupRecord> analyse_name_spec();
     GroupRecord analyse_single_group();
 
+    vector<Column> analyse_select_stmt();
+    vector<Column> analyse_select_list();
+    Column analyse_select_item();
+
     //data operation
     View get_view_by_alias(string alias);
     View get_view_by_name(string name);

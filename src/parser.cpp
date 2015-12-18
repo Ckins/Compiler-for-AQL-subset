@@ -38,7 +38,7 @@ Parser::~Parser() {
 //announce error
 void Parser::error(string func) {
     if (!is_end_) {
-        cout << "Error in line: " << peek_.line_ << endl
+        cout << "Syntac Error in line: " << peek_.line_ << endl
             << " the Token is: " << peek_.toString() << endl
             << "call by " << func << endl;
         exit(0);
@@ -222,7 +222,7 @@ vector<Column> Parser::analyse_view_stmt() {
     scan();
     if (peek_is_match("select")) {
         //cout << "select stmt" << endl;
-        
+        result_vector = analyse_select_stmt();
     } else if (peek_is_match("extract")) {
         //cout << "extract stmt" << endl;
         result_vector = analyse_extract_stmt();
@@ -231,6 +231,78 @@ vector<Column> Parser::analyse_view_stmt() {
     }
     
     return result_vector;
+}
+
+/*
+*select_stmt → select   select_list 
+*               from    from_list
+*/
+vector<Column> Parser::analyse_select_stmt() {
+    vector<Column> result_vector;
+    //analyse from_list first to determine the alias names
+    int tmp_pos = peek_pos_;
+    analyse_from_list();
+    peek_pos_ = tmp_pos;
+
+    result_vector = analyse_select_list();
+    return result_vector;
+}
+
+/*
+*select_list → select_item 
+            |  select_list , select_item
+*/
+vector<Column> Parser::analyse_select_list() {
+    vector<Column> result_vector;
+    if (scan() && peek_has_type_of(Tag::ID)) {
+        result_vector.push_back(analyse_select_item());
+    }
+    while (scan() && peek_is_match(",")) {
+        if (scan() && peek_has_type_of(Tag::ID)) {
+            result_vector.push_back(analyse_select_item());
+        }
+    }
+
+    //skip from_list stmt;
+    analyse_from_list();
+
+    return result_vector;
+}
+
+/*
+*select_item → ID . ID alias
+*/
+Column Parser::analyse_select_item() {
+    //cout << "select_item" << endl;
+    string view_alias = peek_.toString();
+    string origin_col_name = "";
+    string new_col_name = "";
+    if (scan() && peek_is_match(".")) {
+        if (scan() && peek_has_type_of(Tag::ID)) {
+            origin_col_name = peek_.toString();
+        } else {
+            error("analyse_select_item()1");
+        }
+    } else {
+        error("analyse_select_item()2");
+    }
+    //cout << view_alias << origin_col_name << endl;
+    if (scan() && peek_is_match("as")) {
+        if (scan() && peek_has_type_of(Tag::ID)) {
+            new_col_name = peek_.toString();
+        } else {
+            error("analyse_select_item()3");
+        }     
+    }
+
+    View src_view = get_view_by_alias(view_alias);
+    Column result_col = src_view.get_column_by_name(origin_col_name);
+
+    if (new_col_name.length() > 0) {
+        result_col.set_name(new_col_name);
+    }
+    //cout << peek_.toString() << endl;
+    return result_col;
 }
 
 
@@ -294,6 +366,7 @@ vector<Column> Parser::analyse_regex_spec() {
     for (int group_seq = 0; group_seq < group_length; group_seq++) {
         Column single_column;
         single_column.set_name(group_records[group_seq].colomn_id_);
+        //cout << group_records[group_seq].colomn_id_ << endl;
 
         vector<vector<int> >result_from_engine;
 
@@ -376,8 +449,8 @@ GroupRecord Parser::analyse_single_group() {
         error("analyse_single_group()");
     }
     scan();
-    //record.colomn_id_ = peek_.toString();
-    cout << record.colomn_id_ << endl;
+    record.colomn_id_ = peek_.toString();
+    //cout << record.colomn_id_ << endl;
     return record;
 }
 
