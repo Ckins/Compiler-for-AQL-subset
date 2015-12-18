@@ -16,10 +16,13 @@ class Column{
     void set_name(string name);
     void add_span(Span token);
     void set_list(vector<Span> v);
+    int calculate_col_width();
+    int get_col_width();
 
   private:
     std::vector<Span> span_list_;
     string col_name_;
+    int col_width_;
 };
 
 #endif

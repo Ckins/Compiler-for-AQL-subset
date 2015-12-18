@@ -7,7 +7,7 @@ LFLAGS = -Wall $(DEBUG)
 AQL : $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) -o AQL
 	-rm *.o
-	./AQL PerLoc.aql PerLoc.input
+	./AQL PerLoc.aql PerLoc.input > output
 
 main.o : tokenizer.h code_token.h lexer.h parser.h
 	$(CC) $(CFLAGS) main.cpp

@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <sstream>
 
+// transfer int to string 
 #ifndef SSTR
 #define SSTR( x ) dynamic_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()

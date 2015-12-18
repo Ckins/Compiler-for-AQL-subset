@@ -1,0 +1,23 @@
+Processing PerLoc.input
+View: Cap
++----------------------+
+| Cap                  |
++----------------------+
+| Carter               |
+| Plains               |
+| Georgia              |
+| Washington           |
+| Westmoreland         |
+| Virginia             |
++----------------------+
+6 rows in set
+
+View: Stt
++--------------------+
+| Stt                |
++--------------------+
+| Georgia            |
+| Washington         |
+| Virginia           |
++--------------------+
+3 rows in set

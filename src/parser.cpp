@@ -2,6 +2,7 @@
 #include <string>
 #include <exception>
 #include <iostream>
+#include <iomanip>
 #include <map>
 
 extern vector<vector<int> >
@@ -14,6 +15,7 @@ Parser::Parser(vector<CodeToken> lexer_list, const Tokenizer &t) {
     is_end_ = false;
     first_print_ = true;
     file_name_ = t.file_name_;
+    peek_ = CodeToken(' ');
 
     //create initial view as Document D.text
     Column text;
@@ -56,7 +58,9 @@ void Parser::analyse_program() {
 */
 void Parser::analyse_aql_stmt() {
     reset_all_view_alias();
-    scan();
+    if (peek_is_match(" ") || peek_is_match(";")) {
+        scan();
+    }
     if (peek_is_match("create")) {
         //cout << "create stmt" << endl;
         analyse_create_stmt();
@@ -95,15 +99,79 @@ void Parser::analyse_output_stmt() {
 void Parser::print_view(View output_view) {
     if (first_print_) {
         first_print_ = false;
-        cout << "Processing " << file_name_ << endl;
+        cout << "Processing " << file_name_;
     }
     if (output_view.get_alias().length() == 0) {
-        cout << "View: "<< output_view.get_name() << endl;
+        cout  << endl << "View: "<< output_view.get_name() << endl;
     } else {
-        cout << "View: "<< output_view.get_alias() << endl;
+        cout  << endl << "View: "<< output_view.get_alias() << endl;
     }
 
+    print_format_line(output_view);
+    print_format_column(output_view);
+    print_format_line(output_view);
+    print_format_span(output_view);
+    print_format_line(output_view);
+
+    cout << output_view.get_column_list()[0].get_span_list().size();
+    cout << " rows in set" << endl;
+}
+
+//| Georgia:(20,27)    | Plains, Georgia:(12,27)        | Plains:(12,18)       |
+
+void Parser::print_format_span(View output_view) {
+    vector<Column> col_list = output_view.get_column_list();
+    int col_num = col_list.size();
+    int row_num = col_list[0].get_span_list().size();
     
+    for (int j = 0; j < row_num; j++) {
+        cout << '|';
+        for (int i = 0; i < col_num; i++) {
+            int col_width = col_list[i].calculate_col_width();
+            cout << setiosflags( ios::left );
+            cout << ' ' << setw(col_width-1) << col_list[i].get_span_list()[j].value_;
+            cout << '|';
+        }
+        cout << endl;
+    }
+}
+
+/*
+*print |Loc    |
+*/
+void Parser::print_format_column(View  output_view) {
+    vector<Column> col_list = output_view.get_column_list();
+    int col_num = col_list.size();
+    cout << '|';
+    for (int i = 0; i < col_num; i++) {
+        int col_width = col_list[i].calculate_col_width();
+        cout << setiosflags( ios::left );
+        cout << ' ' << setw(col_width-1) << col_list[i].get_name();
+        cout << '|';
+    }
+    cout << endl;
+}
+
+/*
+*print +---------------+-------+----------
+*/
+void Parser::print_format_line(View output_view) {
+    vector<Column> col_list = output_view.get_column_list();
+    int col_num = col_list.size();
+    if (col_num == 0) {
+        cout << "Empty set" << endl;
+        return;
+    }
+    cout << "+";
+    for (int i = 0; i < col_num; i++) {
+        int col_width = col_list[i].calculate_col_width();
+        //cout << "col_width" <<col_list[i].get_col_width() << endl;
+        for (int j = 0; j < col_width; j++) {
+            cout << '-';
+        }
+        cout << '+';
+    }
+    cout << endl;
 }
 
 /*

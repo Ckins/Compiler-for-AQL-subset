@@ -1,4 +1,7 @@
 #include "column.h"
+#include "code_token.h"
+#include <string>
+#include <sstream>
 
 Column::Column() {
     col_name_ = "";
@@ -31,4 +34,22 @@ void Column::add_span(Span token) {
 
 void Column::set_list(vector<Span> v) {
     span_list_ = v;
+}
+
+int Column::calculate_col_width() {
+    int length = span_list_.size();
+    int max = col_name_.length()+2;
+    for (int i = 0; i < length; i++) {
+        int tmp = span_list_[i].value_.length()+SSTR(span_list_[i].start_pos_).length()+
+            SSTR(span_list_[i].end_pos_).length()+6;
+        if (tmp > max) {
+            max = tmp;
+        }
+    }
+    col_width_ = max;
+    return col_width_;
+}
+
+int Column::get_col_width() {
+    return col_width_;
 }
