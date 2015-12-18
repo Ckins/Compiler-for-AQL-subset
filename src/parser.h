@@ -38,6 +38,9 @@ class Parser {
     vector<Column> analyse_select_list();
     Column analyse_select_item();
 
+    //analyse pattern
+    vector<Column> analyse_pattern_spec();
+
     //data operation
     View get_view_by_alias(string alias);
     View get_view_by_name(string name);

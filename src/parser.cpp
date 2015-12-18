@@ -122,7 +122,7 @@ void Parser::print_view(View& output_view) {
 void Parser::print_format_span(View& output_view) {
     vector<Column> col_list = output_view.get_column_list();
     unsigned int col_num = col_list.size();
-    unsigned int row_num = col_list[0].get_span_list().size();
+    unsigned int row_num = output_view.calculate_row_num();
     
     for (unsigned int j = 0; j < row_num; j++) {
         cout << '|';
@@ -325,12 +325,29 @@ vector<Column> Parser::analyse_extract_stmt() {
         result_vector = (analyse_regex_spec());
     } else if (peek_is_match("pattern")) {
         cout << "pattern_spec" << endl;
-        
+        result_vector = analyse_pattern_spec();
     } else {
         error("analyse_extract_stmt()");
     }
 
     return result_vector;
+}
+
+/*
+* pattern_spec → pattern pattern_expr 
+                 name_spec
+*/
+vector<Column> Parser::analyse_pattern_spec() {
+    vector<Column> result_vector_of_column;
+
+    //analyse name_spec, and remember
+    vector<GroupRecord> group_records = analyse_name_spec();
+
+
+    //skip from_list stmt;
+    analyse_from_list();
+
+    return result_vector_of_column;
 }
 
 /*
