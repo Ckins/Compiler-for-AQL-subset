@@ -38,10 +38,12 @@ class Parser {
     View get_view_by_alias(string alias);
     View get_view_by_name(string name);
     void reset_all_view_alias();
-    void print_view(View output_view);
-    void print_format_line(View output_view);
-    void print_format_column(View output_view);
-    void print_format_span(View output_view);
+
+    //display
+    void print_view(View& output_view);
+    void print_format_line(View& output_view);
+    void print_format_column(View& output_view);
+    void print_format_span(View& output_view);
 
     //auxiliary function
     bool peek_is_match(const char*reserve);

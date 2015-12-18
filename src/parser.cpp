@@ -96,7 +96,7 @@ void Parser::analyse_output_stmt() {
     }
 }
 
-void Parser::print_view(View output_view) {
+void Parser::print_view(View& output_view) {
     if (first_print_) {
         first_print_ = false;
         cout << "Processing " << file_name_;
@@ -119,17 +119,23 @@ void Parser::print_view(View output_view) {
 
 //| Georgia:(20,27)    | Plains, Georgia:(12,27)        | Plains:(12,18)       |
 
-void Parser::print_format_span(View output_view) {
+void Parser::print_format_span(View& output_view) {
     vector<Column> col_list = output_view.get_column_list();
-    int col_num = col_list.size();
-    int row_num = col_list[0].get_span_list().size();
+    unsigned int col_num = col_list.size();
+    unsigned int row_num = col_list[0].get_span_list().size();
     
-    for (int j = 0; j < row_num; j++) {
+    for (unsigned int j = 0; j < row_num; j++) {
         cout << '|';
-        for (int i = 0; i < col_num; i++) {
+        for (unsigned int i = 0; i < col_num; i++) {
             int col_width = col_list[i].calculate_col_width();
+            string single_span = "";
+            if (j < col_list[i].get_span_list().size()) {
+                single_span = col_list[i].get_span_list()[j].value_+":("
+                + SSTR(col_list[i].get_span_list()[j].start_pos_) + ','
+                + SSTR(col_list[i].get_span_list()[j].end_pos_) + ')';
+            }       
             cout << setiosflags( ios::left );
-            cout << ' ' << setw(col_width-1) << col_list[i].get_span_list()[j].value_;
+            cout << ' ' << setw(col_width-1) << single_span;
             cout << '|';
         }
         cout << endl;
@@ -139,11 +145,11 @@ void Parser::print_format_span(View output_view) {
 /*
 *print |Loc    |
 */
-void Parser::print_format_column(View  output_view) {
+void Parser::print_format_column(View& output_view) {
     vector<Column> col_list = output_view.get_column_list();
-    int col_num = col_list.size();
+    unsigned int col_num = col_list.size();
     cout << '|';
-    for (int i = 0; i < col_num; i++) {
+    for (unsigned int i = 0; i < col_num; i++) {
         int col_width = col_list[i].calculate_col_width();
         cout << setiosflags( ios::left );
         cout << ' ' << setw(col_width-1) << col_list[i].get_name();
@@ -155,7 +161,7 @@ void Parser::print_format_column(View  output_view) {
 /*
 *print +---------------+-------+----------
 */
-void Parser::print_format_line(View output_view) {
+void Parser::print_format_line(View& output_view) {
     vector<Column> col_list = output_view.get_column_list();
     int col_num = col_list.size();
     if (col_num == 0) {
@@ -284,10 +290,10 @@ vector<Column> Parser::analyse_regex_spec() {
     View source_view = get_view_by_alias(colomn_ids[0].toString());
     Column source_column = source_view.get_column_by_name(colomn_ids[1].toString());
 
-    if (group_records.size() == 1) {
-
+    int group_length = group_records.size();
+    for (int group_seq = 0; group_seq < group_length; group_seq++) {
         Column single_column;
-        single_column.set_name(group_records[0].colomn_id_);
+        single_column.set_name(group_records[group_seq].colomn_id_);
 
         vector<vector<int> >result_from_engine;
 
@@ -303,16 +309,17 @@ vector<Column> Parser::analyse_regex_spec() {
 
                 int j;
                 string match_span = "";
-                for (j = result_from_engine[i][0]; j < result_from_engine[i][1]; j++) {
+                for (j = result_from_engine[i][2*group_seq]; j < result_from_engine[i][1+2*group_seq]; j++) {
                     match_span += str[j];
                 }
                 //cout << match_span << result_from_engine[i][0] << j << endl;
-                Span tmp_span(result_from_engine[i][0], j, match_span);
-                single_column.add_span(tmp_span);
+                if (match_span.length() > 0) {
+                    Span tmp_span(result_from_engine[i][2*group_seq], j, match_span);
+                    single_column.add_span(tmp_span);
+                } 
             }
         }
         result_vector_of_column.push_back(single_column);
-        
     }
 
     //skip from_list stmt;
@@ -364,12 +371,12 @@ GroupRecord Parser::analyse_single_group() {
     }
     GroupRecord record;
     record.group_num_ = peek_.num_value_;
-    cout << record.group_num_ << endl;
+    //cout << record.group_num_ << endl;
     if (!(scan() && peek_is_match("as"))) {
         error("analyse_single_group()");
     }
     scan();
-    record.colomn_id_ = peek_.toString();
+    //record.colomn_id_ = peek_.toString();
     cout << record.colomn_id_ << endl;
     return record;
 }
