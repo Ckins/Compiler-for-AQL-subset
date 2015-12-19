@@ -25,6 +25,7 @@ public:
     void reserve(CodeToken w);
     //bool readch(char c);
     bool is_letter(char c);
+    bool is_letter_or_num(char c);
     CodeToken scan();
     vector<CodeToken> get_list();
 };

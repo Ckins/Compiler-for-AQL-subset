@@ -1,7 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#define DEBUG true
+#define DEBUG false
 
 #include <iostream>
 #include <vector>

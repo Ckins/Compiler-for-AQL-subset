@@ -62,6 +62,11 @@ bool Lexer::is_letter(char c) {
     return false;
 }
 
+bool Lexer::is_letter_or_num(char c) {
+    return ((c <= '9' && c >= '0') || (c <= 'Z' && c >= 'A') ||
+        (c <= 'z' && c >= 'a'));
+}
+
 CodeToken Lexer::scan() {
     for ( ;!is_end_; readch()) {
         if (peek_ == ' ' || peek_ == '\t') continue;
@@ -87,7 +92,7 @@ CodeToken Lexer::scan() {
         do {
             b += peek_;
             readch();
-        } while (is_letter(peek_));
+        } while (is_letter_or_num(peek_));
         if (words_.find(b) != words_.end()) {
             CodeToken tmpWord = words_[b];
             tmpWord.line_ = line_;
