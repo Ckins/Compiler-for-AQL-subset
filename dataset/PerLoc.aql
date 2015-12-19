@@ -16,9 +16,7 @@ create view PerLocOnly as
 
 create view Loc as
   extract pattern (<C.Cap>) /,/ (<S.Stt>)
-  return group 0 as Loc
-    and group 1 as Cap
-    and group 2 as Stt
+  as Loc
   from Cap C, Stt S;
 
 output view Cap;

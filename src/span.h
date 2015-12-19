@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -11,6 +12,9 @@ class Span {
     int start_pos_;
     int end_pos_;
     string value_;
+    void display() {
+        cout << value_ << "(" << start_pos_ << "," << end_pos_ << ")" << endl;
+    }
     Span() { }
     Span(int s = 0, int e = 0, string v = "") :
         start_pos_(s), end_pos_(e), value_(v) {}
@@ -48,6 +52,7 @@ public:
     PatternGroup() { };
     ~PatternGroup() { };
     int group_num_;
+    string column_id_; // assigned by group Record
     int start_col_seq_;
     int end_col_seq_;
     vector<Atom> content_atoms_;

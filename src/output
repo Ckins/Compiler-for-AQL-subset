@@ -1,4 +1,41 @@
 pattern_spec
+C262
+,260
+S262
+
+
+
+
+test content colsCarter(0,6)
+Plains(12,18)
+Georgia(20,27)
+Washington(29,39)
+Westmoreland(45,57)
+Virginia(59,67)
+,(18,19)
+,(27,28)
+,(57,58)
+Georgia(20,27)
+Washington(29,39)
+Virginia(59,67)
+
+
+
+
+wanted_groups size = 1
+group_num: 0group_name: Loc from col 0to 3
+type: 262
+C
+re-min: 1
+re-max: 1
+type: 260
+
+re-min: 1
+re-max: 1
+type: 262
+S
+re-min: 1
+re-max: 1
 Processing PerLoc.input
 View: Cap
 +----------------------+

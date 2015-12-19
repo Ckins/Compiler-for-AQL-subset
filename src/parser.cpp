@@ -314,7 +314,7 @@ vector<Column> Parser::analyse_extract_stmt() {
         
         result_vector = (analyse_regex_spec());
     } else if (peek_is_match("pattern")) {
-        cout << "pattern_spec" << endl;
+        if (DEBUG) cout << "pattern_spec" << endl;
         result_vector = analyse_pattern_spec();
     } else {
         error("analyse_extract_stmt()");
@@ -338,6 +338,66 @@ vector<Column> Parser::analyse_pattern_spec() {
 
     //really analyse here
 
+    //content column fetch, all columns are include in default group 0
+    vector<Column> content_base;
+    PatternGroup default_group = pattern_groups[0];
+    vector<Atom> all_atoms = default_group.content_atoms_;
+    for (int i = 0; (unsigned int)i < all_atoms.size(); i++) {
+        Column content_col;
+        if (all_atoms[i].type_ == Tag::TOKEN) {
+            content_col = get_column_from_tokenizer();
+        } else if (all_atoms[i].type_ == Tag::REGEX_EXPR) {
+            content_col = get_column_as_regex(all_atoms[i].regex_expr_);
+        } else if (all_atoms[i].type_ == Tag::ID) {
+            View tmp_view = get_view_by_alias(all_atoms[i].view_alias_);
+            content_col = tmp_view.get_column_by_name(all_atoms[i].col_name_);
+        }
+        content_base.push_back(content_col);
+    }
+
+    if (DEBUG) {
+        cout << "\n\n\n\n" << "test content cols\n";
+        for (int i = 0; i < content_base.size();i++) {
+            for (int j = 0; j < content_base[i].get_span_list().size();j++) {
+                content_base[i].get_span_list()[j].display();
+            }
+        }
+        cout << "\n\n\n\n";
+    }
+    
+    //match group num to column_id
+    vector<PatternGroup> wanted_groups;
+    for (int i = 0; i < group_records.size(); i++) {
+        int tmp_num = 0;
+        for (int j = 0; j < pattern_groups.size(); j++) {
+            if (pattern_groups[j].group_num_ == group_records[i].group_num_) {
+                pattern_groups[j].column_id_ = group_records[i].column_id_;
+                wanted_groups.push_back(pattern_groups[j]);
+            }
+        }
+    }
+
+    cout << "wanted_groups size = " << wanted_groups.size() << endl;
+
+    //debug information
+    if (DEBUG) {
+        for (int i = 0; i < wanted_groups.size(); i++) {
+            PatternGroup tmp_group = wanted_groups[i];
+            cout << "group_num: " << tmp_group.group_num_ 
+                << "group_name: " << tmp_group.column_id_ 
+                << " from col " << tmp_group.start_col_seq_ << "to " << tmp_group.end_col_seq_ <<endl;
+            for (int j = 0; j < tmp_group.content_atoms_.size();j++) {
+                cout << "type: " << tmp_group.content_atoms_[j].type_ <<endl;
+                cout << tmp_group.content_atoms_[j].view_alias_ << endl;
+                cout << "re-min: " << tmp_group.content_atoms_[j].repeat_min_ <<endl;
+                cout << "re-max: " << tmp_group.content_atoms_[j].repeat_max_ <<endl;
+            }
+        }        
+    }
+
+    //column link
+
+
 
     //skip from_list stmt;
     analyse_from_list();
@@ -354,18 +414,20 @@ vector<PatternGroup> Parser::analyse_pattern_expr() {
 
     //default group0 analyse, ignoring capture "()"
     PatternGroup group_0;
-    while (scan() && !peek_is_match("return")) {
+    int content_col_num = 0;
+    while (scan() && !(peek_is_match("return") || peek_is_match("as")))  {
         Atom tmp_atom;
         if (peek_is_match("(") || peek_is_match(")")) {
             continue;
-        } else if (peek_is_match("<")) {
+        } else if (peek_is_match("<") || peek_has_type_of(Tag::REGEX_EXPR)) {
             tmp_atom = analyse_atom();
-            
+            content_col_num++; 
             // see whether it needs repeat
             if (scan() && peek_is_match("{")) {
                 assert_next_peek_has_type(Tag::NUM);
                 tmp_atom.repeat_min_ = peek_.num_value_;
                 assert_next_peek_is_match(",");
+                assert_next_peek_has_type(Tag::NUM);
                 tmp_atom.repeat_max_ = peek_.num_value_;
                 assert_next_peek_is_match("}");
             } else {
@@ -374,6 +436,10 @@ vector<PatternGroup> Parser::analyse_pattern_expr() {
         }
         group_0.content_atoms_.push_back(tmp_atom);
     }
+    group_0.group_num_ = 0;
+    group_0.start_col_seq_ = 0;
+    group_0.end_col_seq_ = content_col_num;
+    pattern_groups.push_back(group_0);
 
     //get the sub group1 to group n if they exist
     // while () {
@@ -402,8 +468,13 @@ vector<PatternGroup> Parser::analyse_pattern_pkg() {
 */
 Atom Parser::analyse_atom() {
     Atom result_atom;
-    scan();
-    // column >
+
+    // reg_exp has no "<"  ">" surrounded
+    if (!peek_has_type_of(Tag::REGEX_EXPR)) scan();
+    //
+    if (DEBUG) {
+        cout << peek_.toString() << peek_.tag_ << endl;
+    }
     if (peek_has_type_of(Tag::ID)) {
         step_back();
         result_atom.type_ = Tag::ID;
@@ -717,4 +788,44 @@ bool Parser::assert_next_peek_has_type(int tag) {
         error("assertion not match");
         return false;
     }
+}
+
+Column Parser::get_column_from_tokenizer() {
+    Column res_col;
+    for (unsigned int i = 0; i < doc_token_list_.size();i++) {
+        Span tmp(doc_token_list_[i].start_pos_, doc_token_list_[i].end_pos_, doc_token_list_[i].content_);
+        res_col.add_span(tmp);
+    }
+    return res_col;
+}
+
+Column Parser::get_column_as_regex(string reg) {
+    Column single_column;
+    View source_view = get_view_by_name("Document");
+    Column source_column = source_view.get_column_by_name("text");
+    vector<vector<int> >result_from_engine;
+    vector<Span>::iterator span_it = source_column.get_span_list().begin();
+    vector<Span>::iterator span_end = source_column.get_span_list().end();
+
+    for (; span_it != span_end; span_it++) {
+        string str = (*span_it).value_;
+        result_from_engine = findall(reg.c_str(), str.c_str());
+        //cout << "result_from_engine : " <<result_from_engine.size() << endl;
+        int length = result_from_engine.size();
+        for (int i = 0; i < length; i++) {
+
+            int j;
+            string match_span = "";
+            for (j = result_from_engine[i][0]; j < result_from_engine[i][1]; j++) {
+                match_span += str[j];
+            }
+            //cout << match_span << result_from_engine[i][0] << j << endl;
+            if (match_span.length() > 0) {
+                Span tmp_span(result_from_engine[i][0], j, match_span);
+                single_column.add_span(tmp_span);
+            }
+        }
+    }
+
+    return single_column;
 }

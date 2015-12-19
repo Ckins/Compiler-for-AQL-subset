@@ -1,6 +1,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#define DEBUG true
+
 #include <iostream>
 #include <vector>
 #include "code_token.h"
@@ -45,6 +47,8 @@ class Parser {
     vector<PatternGroup> analyse_pattern_pkg();
     // PatternGroup analyse_pattern_group();
     Atom analyse_atom();
+    Column get_column_from_tokenizer();
+    Column get_column_as_regex(string regex);
 
     //data operation
     View get_view_by_alias(string alias);
