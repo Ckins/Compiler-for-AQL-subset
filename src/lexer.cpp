@@ -26,7 +26,7 @@ Lexer::Lexer(const char* file) {
     reserve(CodeToken(string("return"), Tag::RETURN));
     reserve(CodeToken(string("group"), Tag::GROUP));
     reserve(CodeToken(string("and"), Tag::AND));
-    reserve(CodeToken(string("token"), Tag::TOKEN));
+    reserve(CodeToken(string("Token"), Tag::TOKEN));
     reserve(CodeToken(string("pattern"), Tag::PATTERN));
 
     while(!is_end_) {

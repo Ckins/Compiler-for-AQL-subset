@@ -7,18 +7,13 @@ create view Stt as
   extract regex /(Washing)ton|Georgia|Virginia/
     on D.text
     return group 0 as Stt
-    and group 1 as Was
   from Document D;
 
-create view PerLocOnly as
-    select PL.Stt as PerLoc
-    from Stt PL;
-
 create view Loc as
-  extract pattern (<C.Cap>) /,/ (<S.Stt>)
+  extract pattern (<Token>{1,2})
   as Loc
   from Cap C, Stt S;
 
 output view Cap;
 output view Stt;
-output view PerLocOnly;
+output view Loc;

@@ -50,7 +50,7 @@ void Tokenizer::make_token() {
             doc_vector_.push_back(DocToken(token_start, pos, token_content));
             if (single_char == ' ' || single_char == '\n') {
                 token_content = std::string("");
-                token_start = pos+1;
+                token_start = pos;
             } else {
                 token_content = std::string("");
                 token_content += single_char;
