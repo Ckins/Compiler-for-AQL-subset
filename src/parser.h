@@ -44,7 +44,7 @@ class Parser {
     //analyse pattern
     vector<Column> analyse_pattern_spec();
     vector<PatternGroup> analyse_pattern_expr();
-    vector<PatternGroup> analyse_pattern_pkg();
+    PatternGroup analyse_pattern_pkg();
     // PatternGroup analyse_pattern_group();
     Atom analyse_atom();
     Column get_column_from_tokenizer();

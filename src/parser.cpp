@@ -334,13 +334,14 @@ vector<Column> Parser::analyse_pattern_spec() {
     // remember the pattern_expr in proper database structure
     // record the ()
     vector<PatternGroup> pattern_groups = analyse_pattern_expr();
+    cout << "record the ()\n";
 
     //analyse name_spec, and remember
     // record the require!
     vector<GroupRecord> group_records = analyse_name_spec();
 
     //really analyse here
-
+    cout << "really analyse here\n";
     //content column fetch, all columns are include in default group 0
     vector<Column> content_base;
     PatternGroup default_group = pattern_groups[0];
@@ -415,7 +416,7 @@ vector<Column> Parser::analyse_pattern_spec() {
                 cout << "target-size " << target_span_list.size() << endl;
             }
             //minial required, need to erase the unlinkable spans
-            for (int k = 0; k < wanted_groups[i].content_atoms_[j].repeat_min_;k++) {
+            for (int k = 0; k < all_atoms[j].repeat_min_;k++) {
                 cout << "minnnnnnnn\n";
                 for (int loop_out = 0; loop_out < target_span_list.size(); loop_out++) {
                     bool is_link = false;
@@ -442,7 +443,7 @@ vector<Column> Parser::analyse_pattern_spec() {
             }
 
             //maximun limit
-            for (int k = 0; k < wanted_groups[i].content_atoms_[j].repeat_max_-wanted_groups[i].content_atoms_[j].repeat_min_;k++) {
+            for (int k = 0; k < all_atoms[j].repeat_max_-all_atoms[j].repeat_min_;k++) {
                 cout << "maxxxxxxxxxxxx\n";
                 unsigned int origin_size = target_span_list.size();
                 for (int loop_out = 0; loop_out < origin_size; loop_out++) {
@@ -482,6 +483,7 @@ vector<Column> Parser::analyse_pattern_spec() {
 *             |  pattern_expr   pattern_pkg
 */
 vector<PatternGroup> Parser::analyse_pattern_expr() {
+    cout << "i am here\n";
     vector<PatternGroup> pattern_groups;
 
     //default group0 analyse, ignoring capture "()"
@@ -513,12 +515,45 @@ vector<PatternGroup> Parser::analyse_pattern_expr() {
     group_0.end_col_seq_ = content_col_num;
     pattern_groups.push_back(group_0);
 
+    // return back to the beginning of the pattern_expr
+    cout << "before step back " << peek_.toString() << endl;
+    while (!peek_is_match("pattern")) {
+        step_back();
+    }
+    scan();
+
     //get the sub group1 to group n if they exist
-    // while () {
-    //     pattern_groups.insert(analyse_pattern_pkg();
-    // }
+    cout << "get the sub group1 to group n if they exist...........\n";
+    cout << peek_.toString() << endl;
+    int tmp_pos;
+    int sub_group_num = 0;
+    int col_seq = 0;
+
+    PatternGroup group_tmp;
+    while (scan() && (cout << peek_.toString() << endl) && !(peek_is_match("return") || peek_is_match("as"))) {
+        if (peek_is_match("(")) {
+            tmp_pos = peek_pos_;
+            group_tmp = analyse_pattern_pkg();
+            if (group_tmp.end_col_seq_ != -1) {
+                // calculate begin
+                group_tmp.start_col_seq_ = col_seq;
+                group_tmp.end_col_seq_ = group_tmp.end_col_seq_+col_seq;
+                group_tmp.group_num_ = ++sub_group_num;
+                pattern_groups.push_back(group_tmp);
+            }
+            peek_pos_ = tmp_pos;
+        } else if (peek_has_type_of(Tag::REGEX_EXPR)) {
+            col_seq++;
+        } else if (peek_is_match("<")) {
+            col_seq++;
+            while (!peek_is_match(">")) {
+                scan();
+            }
+        }
+    }
 
     step_back();
+    cout << "subgroup" << sub_group_num << endl;
     return pattern_groups;
 }
 
@@ -528,10 +563,32 @@ vector<PatternGroup> Parser::analyse_pattern_expr() {
             |   pattern_group
 
   here gets group1 to group n if they exist
-  insert this vector behind the default group 0
+  insert group1 to group n if they exist 
 */
-vector<PatternGroup> Parser::analyse_pattern_pkg() {
-    vector<PatternGroup> no;
+PatternGroup Parser::analyse_pattern_pkg() {
+    cout << "fuckkkkkkkkkkkkkkkkkk\n";
+    PatternGroup no;
+    int inner_capture = 0;
+    int col_move = -1;
+    no.end_col_seq_ = -1;
+    while (scan() && !(peek_is_match("return") || peek_is_match("as"))) {
+        if (peek_is_match(")") && inner_capture == 0) {
+            no.end_col_seq_ = col_move;
+            break;
+        } else if (peek_is_match(")")) {
+            inner_capture--;
+        } else if (peek_is_match("(")) {
+            inner_capture++;
+        } else if (peek_has_type_of(Tag::REGEX_EXPR)) {
+            col_move++;
+        } else if (peek_is_match("<")) {
+            col_move++;
+            while (!peek_is_match(">")) {
+                scan();
+            }
+        }
+    }
+
     return no;
 }
 
@@ -829,6 +886,7 @@ void Parser::step_back() {
     if (!peek_pos_ <= 0) {
         peek_pos_--;
     }
+    peek_ = lexer_list_[peek_pos_];
 }
 
 //announce error
