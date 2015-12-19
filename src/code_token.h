@@ -14,6 +14,7 @@
 using namespace std;
 
 //Tag 用于区别不同的保留字，标识符，数字
+// SINGLE_TOKEN : "," ";"
 class Tag {
 public:
     const static int

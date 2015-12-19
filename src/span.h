@@ -20,12 +20,37 @@ class Span {
 class GroupRecord {
   public:
     int group_num_;
-    string colomn_id_;
+    string column_id_;
     GroupRecord() { }
     GroupRecord(int n, string id) :
-        group_num_(n), colomn_id_(id) { }
+        group_num_(n), column_id_(id) { }
     ~GroupRecord() { }
     
+};
+
+class Atom {
+public:
+    Atom() { 
+        repeat_min_ = 1;
+        repeat_max_ = 1;
+    }
+    ~Atom() { };
+    int type_;
+    int repeat_min_;
+    int repeat_max_;
+    string view_alias_;
+    string col_name_;
+    string regex_expr_;
+};
+
+class PatternGroup {
+public:
+    PatternGroup() { };
+    ~PatternGroup() { };
+    int group_num_;
+    int start_col_seq_;
+    int end_col_seq_;
+    vector<Atom> content_atoms_;
 };
 
 #endif

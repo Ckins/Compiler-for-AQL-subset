@@ -19,6 +19,7 @@ class Parser {
 
     //basic step
     bool scan();
+    void step_back();
     void analyse_program();
     
     //language analyse
@@ -40,6 +41,10 @@ class Parser {
 
     //analyse pattern
     vector<Column> analyse_pattern_spec();
+    vector<PatternGroup> analyse_pattern_expr();
+    vector<PatternGroup> analyse_pattern_pkg();
+    // PatternGroup analyse_pattern_group();
+    Atom analyse_atom();
 
     //data operation
     View get_view_by_alias(string alias);
@@ -55,6 +60,9 @@ class Parser {
     //auxiliary function
     bool peek_is_match(const char*reserve);
     bool peek_has_type_of(int tag);
+
+    bool assert_next_peek_is_match(const char*reserve);
+    bool assert_next_peek_has_type(int tag);
     void error(string func);
 
   private:

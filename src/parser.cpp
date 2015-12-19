@@ -35,16 +35,6 @@ Parser::~Parser() {
     //do nothing 
 }
 
-//announce error
-void Parser::error(string func) {
-    if (!is_end_) {
-        cout << "Syntac Error in line: " << peek_.line_ << endl
-            << " the Token is: " << peek_.toString() << endl
-            << "call by " << func << endl;
-        exit(0);
-    }
-}
-
 // to ensure not null analysis
 void Parser::analyse_program() {
     while (!is_end_) {
@@ -314,14 +304,14 @@ vector<Column> Parser::analyse_extract_stmt() {
     scan();
     vector<Column> result_vector;
 
+    //analyse from_list first to determine the alias names
+    int tmp_pos = peek_pos_;
+    analyse_from_list();
+    peek_pos_ = tmp_pos;
+    peek_ = lexer_list_[peek_pos_-1];
     //extract_spec
     if (peek_is_match("regex")) {
-
-        //analyse from_list first to determine the alias names
-        int tmp_pos = peek_pos_;
-        analyse_from_list();
-        peek_pos_ = tmp_pos;
-
+        
         result_vector = (analyse_regex_spec());
     } else if (peek_is_match("pattern")) {
         cout << "pattern_spec" << endl;
@@ -340,14 +330,97 @@ vector<Column> Parser::analyse_extract_stmt() {
 vector<Column> Parser::analyse_pattern_spec() {
     vector<Column> result_vector_of_column;
 
+    // remember the pattern_expr in proper database structure
+    vector<PatternGroup> pattern_groups = analyse_pattern_expr();
+
     //analyse name_spec, and remember
     vector<GroupRecord> group_records = analyse_name_spec();
+
+    //really analyse here
 
 
     //skip from_list stmt;
     analyse_from_list();
 
     return result_vector_of_column;
+}
+
+/*
+*pattern_expr →  pattern_pkg 
+*             |  pattern_expr   pattern_pkg
+*/
+vector<PatternGroup> Parser::analyse_pattern_expr() {
+    vector<PatternGroup> pattern_groups;
+
+    //default group0 analyse, ignoring capture "()"
+    PatternGroup group_0;
+    while (scan() && !peek_is_match("return")) {
+        Atom tmp_atom;
+        if (peek_is_match("(") || peek_is_match(")")) {
+            continue;
+        } else if (peek_is_match("<")) {
+            tmp_atom = analyse_atom();
+            
+            // see whether it needs repeat
+            if (scan() && peek_is_match("{")) {
+                assert_next_peek_has_type(Tag::NUM);
+                tmp_atom.repeat_min_ = peek_.num_value_;
+                assert_next_peek_is_match(",");
+                tmp_atom.repeat_max_ = peek_.num_value_;
+                assert_next_peek_is_match("}");
+            } else {
+                step_back();
+            }
+        }
+        group_0.content_atoms_.push_back(tmp_atom);
+    }
+
+    //get the sub group1 to group n if they exist
+    // while () {
+    //     pattern_groups.insert(analyse_pattern_pkg();
+    // }
+
+    step_back();
+    return pattern_groups;
+}
+
+/*
+* pattern_pkg → atom 
+            |   atom { NUM , NUM } 
+            |   pattern_group
+
+  here gets group1 to group n if they exist
+  insert this vector behind the default group 0
+*/
+vector<PatternGroup> Parser::analyse_pattern_pkg() {
+    vector<PatternGroup> no;
+    return no;
+}
+
+/*
+* atom→ < column > | < Token > | REG
+*/
+Atom Parser::analyse_atom() {
+    Atom result_atom;
+    scan();
+    // column >
+    if (peek_has_type_of(Tag::ID)) {
+        step_back();
+        result_atom.type_ = Tag::ID;
+        vector<CodeToken> view_col_pair = analyse_colomn();
+        result_atom.view_alias_ = view_col_pair[0].toString(); 
+        result_atom.col_name_ = view_col_pair[1].toString();
+        assert_next_peek_is_match(">");
+    } else if (peek_has_type_of(Tag::TOKEN)) {
+        result_atom.type_ = Tag::TOKEN;
+        assert_next_peek_is_match(">");
+    } else if (peek_has_type_of(Tag::REGEX_EXPR)) {
+        result_atom.type_ = Tag::REGEX_EXPR;
+        result_atom.regex_expr_ = peek_.toString();
+    } else {
+        error("unrecognised atom");
+    }
+    return result_atom;
 }
 
 /*
@@ -369,21 +442,21 @@ vector<Column> Parser::analyse_regex_spec() {
     if (!(scan() && peek_is_match("on"))) error("analyse_regex_spec()");
     //get colomn_stmt, and remember them, 
     //View name, Col name
-    vector<CodeToken> colomn_ids = analyse_colomn(); 
+    vector<CodeToken> column_ids = analyse_colomn(); 
 
     //analyse name_spec, and remember
     vector<GroupRecord> group_records = analyse_name_spec();
 
     //really extract here
     //get the exact col and view first
-    View source_view = get_view_by_alias(colomn_ids[0].toString());
-    Column source_column = source_view.get_column_by_name(colomn_ids[1].toString());
+    View source_view = get_view_by_alias(column_ids[0].toString());
+    Column source_column = source_view.get_column_by_name(column_ids[1].toString());
 
     int group_length = group_records.size();
     for (int group_seq = 0; group_seq < group_length; group_seq++) {
         Column single_column;
-        single_column.set_name(group_records[group_seq].colomn_id_);
-        //cout << group_records[group_seq].colomn_id_ << endl;
+        single_column.set_name(group_records[group_seq].column_id_);
+        //cout << group_records[group_seq].column_id_ << endl;
 
         vector<vector<int> >result_from_engine;
 
@@ -466,8 +539,8 @@ GroupRecord Parser::analyse_single_group() {
         error("analyse_single_group()");
     }
     scan();
-    record.colomn_id_ = peek_.toString();
-    //cout << record.colomn_id_ << endl;
+    record.column_id_ = peek_.toString();
+    //cout << record.column_id_ << endl;
     return record;
 }
 
@@ -477,13 +550,13 @@ GroupRecord Parser::analyse_single_group() {
 */
 vector<CodeToken> Parser::analyse_colomn() {
 
-    vector<CodeToken> colomn_ids;
+    vector<CodeToken> column_ids;
 
     if (!(scan() && peek_has_type_of(Tag::ID))) {
         error("analyse_colomn()1");
     }
 
-    colomn_ids.push_back(peek_);
+    column_ids.push_back(peek_);
 
     if (!(scan() && peek_is_match("."))) {
         error("analyse_colomn()2");
@@ -493,8 +566,8 @@ vector<CodeToken> Parser::analyse_colomn() {
         error("analyse_colomn()3");
     }
 
-    colomn_ids.push_back(peek_);
-    return colomn_ids;
+    column_ids.push_back(peek_);
+    return column_ids;
 }
 
 /*
@@ -606,5 +679,42 @@ void Parser::reset_all_view_alias() {
         if ((*it).get_alias().length() > 0) {
             (*it).set_alias(string(""));
         }
+    }
+}
+
+void Parser::step_back() {
+    if (!peek_pos_ <= 0) {
+        peek_pos_--;
+    }
+}
+
+//announce error
+void Parser::error(string func) {
+    if (!is_end_) {
+        cout << "Syntac Error in line: " << peek_.line_ << endl
+            << " the Token is: " << peek_.toString() << endl
+            << "call by " << func << endl;
+        exit(0);
+    }
+}
+
+// move peek_ forward and used as an assertion
+// first used in pattern match 
+bool Parser::assert_next_peek_is_match(const char*reserve) {
+    string cmp(reserve);
+    if (scan() && peek_.toString() == cmp) {
+        return true;
+    } else {
+        error("assertion not match");
+        return false;
+    }
+}
+
+bool Parser::assert_next_peek_has_type(int tag) {
+    if (scan() && peek_.tag_ == tag) {
+        return true;
+    } else {
+        error("assertion not match");
+        return false;
     }
 }
