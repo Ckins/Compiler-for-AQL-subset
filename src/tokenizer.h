@@ -26,7 +26,7 @@ class Tokenizer {
 
     void make_token();
 
-    void display();
+    void display() const;
 
     bool is_num_or_letter(char& c);
 

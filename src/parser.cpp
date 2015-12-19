@@ -9,6 +9,7 @@ extern vector<vector<int> >
 findall(const char *regex, const char *content);
 
 Parser::Parser(vector<CodeToken> lexer_list, const Tokenizer &t) {
+    t.display();
     lexer_list_ = lexer_list;
     doc_token_list_ = t.get_doc_token_list();
     peek_pos_ = 0;
@@ -211,7 +212,7 @@ vector<Column> Parser::analyse_view_stmt() {
 
     scan();
     if (peek_is_match("select")) {
-        //cout << "select stmt" << endl;
+        cout << "select stmt" << endl;
         result_vector = analyse_select_stmt();
     } else if (peek_is_match("extract")) {
         //cout << "extract stmt" << endl;
@@ -263,7 +264,7 @@ vector<Column> Parser::analyse_select_list() {
 *select_item → ID . ID alias
 */
 Column Parser::analyse_select_item() {
-    //cout << "select_item" << endl;
+    cout << "select_item" << endl;
     string view_alias = peek_.toString();
     string origin_col_name = "";
     string new_col_name = "";
@@ -276,7 +277,7 @@ Column Parser::analyse_select_item() {
     } else {
         error("analyse_select_item()2");
     }
-    //cout << view_alias << origin_col_name << endl;
+    cout << view_alias << origin_col_name << endl;
     if (scan() && peek_is_match("as")) {
         if (scan() && peek_has_type_of(Tag::ID)) {
             new_col_name = peek_.toString();
@@ -291,7 +292,7 @@ Column Parser::analyse_select_item() {
     if (new_col_name.length() > 0) {
         result_col.set_name(new_col_name);
     }
-    //cout << peek_.toString() << endl;
+    cout << peek_.toString() << endl;
     return result_col;
 }
 
@@ -432,7 +433,7 @@ vector<Column> Parser::analyse_pattern_spec() {
                     }
                     vector<Span>::iterator it = target_span_list.begin();
                     if (!is_link) {
-                        cout << doc_str.substr(target_span_list[loop_out].start_pos_, target_span_list[loop_out].end_pos_ - target_span_list[loop_out].start_pos_) << endl;
+                        // cout << doc_str.substr(target_span_list[loop_out].start_pos_, target_span_list[loop_out].end_pos_ - target_span_list[loop_out].start_pos_) << endl;
                         //cout << target_span_list[loop_out].start_pos_ << "to" << target_span_list[loop_out].end_pos_ << endl;
                         target_span_list.erase(it+loop_out);
                         loop_out--;
@@ -442,14 +443,18 @@ vector<Column> Parser::analyse_pattern_spec() {
 
             //maximun limit
             for (int k = 0; k < wanted_groups[i].content_atoms_[j].repeat_max_-wanted_groups[i].content_atoms_[j].repeat_min_;k++) {
-                for (int loop_out = 0; loop_out < target_span_list.size(); loop_out++) {
+                cout << "maxxxxxxxxxxxx\n";
+                unsigned int origin_size = target_span_list.size();
+                for (int loop_out = 0; loop_out < origin_size; loop_out++) {
                     for (int loop_inner = 0; loop_inner < link_span_list_behind.size(); loop_inner++) {
                         if (target_span_list[loop_out].end_pos_ == link_span_list_behind[loop_inner].start_pos_
                             || (target_span_list[loop_out].end_pos_+1) == link_span_list_behind[loop_inner].start_pos_) {
 
                             // link
                             Span possible_span(target_span_list[loop_out].start_pos_, link_span_list_behind[loop_inner].end_pos_, string("new one"));
+                            // cout << doc_str.substr(target_span_list[loop_out].start_pos_, target_span_list[loop_out].end_pos_ - target_span_list[loop_out].start_pos_) << endl;
                             target_span_list.push_back(possible_span);
+                            loop_out++;
                             break;
                         }
                     }
@@ -460,7 +465,6 @@ vector<Column> Parser::analyse_pattern_spec() {
         for (int seq = 0; seq < target_span_list.size(); seq++) {
             target_span_list[seq].value_ = doc_str.substr(target_span_list[seq].start_pos_, 
                 target_span_list[seq].end_pos_-target_span_list[seq].start_pos_);
-            cout << target_span_list[seq].value_ << endl;
         }
 
         group_n.set_list(target_span_list);

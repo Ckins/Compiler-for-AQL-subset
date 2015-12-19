@@ -1,42 +1,95 @@
+11
+Carter(0, 6)
+from(6, 11)
+Plains(11, 18)
+,(18, 19)
+Georgia(19, 27)
+,(27, 28)
+Washington(28, 39)
+from(39, 44)
+Westmoreland(44, 57)
+,(57, 58)
+Virginia(58, 67)
 pattern_spec
-Token274
+C262
+,260
+S262
 
 
 
 
 test content cols
-Carter(1,7)
-from(7,12)
-Plains(12,19)
-,(19,20)
-Georgia(20,28)
-,(28,29)
-Washington(29,40)
-from(40,45)
-Westmoreland(45,58)
-,(58,59)
-Virginia(59,68)
+Carter(0,6)
+Plains(12,18)
+Georgia(20,27)
+Washington(29,39)
+Westmoreland(45,57)
+Virginia(59,67)
+,(18,19)
+,(27,28)
+,(57,58)
+Georgia(20,27)
+Washington(29,39)
+Virginia(59,67)
 
 
 
 
 wanted_groups size = 1
-group_num: 0group_name: Loc from col 0to 1
-type: 274
+group_num: 0group_name: Loc from col 0to 3
+type: 262
+C
+re-min: 1
+re-max: 1
+type: 260
 
 re-min: 1
-re-max: 2
-arter 
-from 
-Plains,
- 
-Georgia,
- 
-Washington 
-from 
-Westmoreland,
- 
-Virginia
+re-max: 1
+type: 262
+S
+re-min: 1
+re-max: 1
+target-size 6
+minnnnnnnn
+target-size 3
+minnnnnnnn
+pattern_spec
+P262
+L262
+
+
+
+
+test content cols
+Carter(0,6)
+Plains(12,18)
+Georgia(20,27)
+Washington(29,39)
+Westmoreland(45,57)
+Virginia(59,67)
+Plains, Georgia(12,27)
+Georgia, Washington(20,39)
+Westmoreland, Virginia(45,67)
+
+
+
+
+wanted_groups size = 1
+group_num: 0group_name: PerLoc from col 0to 2
+type: 262
+P
+re-min: 1
+re-max: 1
+type: 262
+L
+re-min: 1
+re-max: 1
+target-size 6
+minnnnnnnn
+select stmt
+select_item
+PLPerLoc
+PerLoc
 Processing PerLoc.input
 View: Cap
 +----------------------+
@@ -62,19 +115,38 @@ View: Stt
 3 rows in set
 
 View: Loc
-+-----------------------+
-| Loc                   |
-+-----------------------+
-| arter :(1,7)          |
-| from :(7,12)          |
-| Plains,:(12,19)       |
-|  :(19,20)             |
-| Georgia,:(20,28)      |
-|  :(28,29)             |
-| Washington :(29,40)   |
-| from :(40,45)         |
-| Westmoreland,:(45,58) |
-|  :(58,59)             |
-| Virginia:(59,68)      |
-+-----------------------+
-11 rows in set
++--------------------------------+
+| Loc                            |
++--------------------------------+
+| Plains, Georgia:(12,27)        |
+| Georgia, Washington:(20,39)    |
+| Westmoreland, Virginia:(45,67) |
++--------------------------------+
+3 rows in set
+
+View: Per
++----------------------+
+| Per                  |
++----------------------+
+| Carter:(0,6)         |
+| Plains:(12,18)       |
+| Georgia:(20,27)      |
+| Washington:(29,39)   |
+| Westmoreland:(45,57) |
+| Virginia:(59,67)     |
++----------------------+
+6 rows in set
+
+View: PerLoc
++--------+
+| PerLoc |
++--------+
++--------+
+0 rows in set
+
+View: PerLocOnly
++--------+
+| PerLoc |
++--------+
++--------+
+0 rows in set

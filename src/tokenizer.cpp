@@ -17,11 +17,11 @@ bool Tokenizer::is_num_or_letter(char& c) {
         (c <= 'z' && c >= 'a'));
 }
 
-void Tokenizer::display() {
+void Tokenizer::display() const {
     cout << doc_vector_.size() << endl;
-    std::vector<DocToken>::iterator it = doc_vector_.begin();
-    for (; it != doc_vector_.end(); it++) {
-        std::cout << (*it).content_ << "(" << (*it).start_pos_ << ", " << (*it).end_pos_ << ")\n";
+    int i;
+    for ( i = 0; i < doc_vector_.size(); i++) {
+        std::cout << doc_vector_[i].content_ << "(" << doc_vector_[i].start_pos_ << ", " << doc_vector_[i].end_pos_ << ")\n";
     }
 }
 
@@ -35,8 +35,8 @@ void Tokenizer::make_token() {
     
     // @param pos : locate the postion in the document
     char single_char;
-    int pos = 1;
-    int token_start = 1;
+    int pos = 0;
+    int token_start = 0;
     std::string token_content = std::string("");
 
     // read char by char to get token
