@@ -111,7 +111,8 @@ void Parser::print_view(View& output_view) {
     print_format_line(output_view);
 
     cout << output_view.get_column_list()[0].get_span_list().size();
-    cout << " rows in set" << endl;
+    cout << " rows in set";
+    if (!is_end_) cout << endl;
 }
 
 //| Georgia:(20,27)    | Plains, Georgia:(12,27)        | Plains:(12,18)       |
@@ -161,10 +162,6 @@ void Parser::print_format_column(View& output_view) {
 void Parser::print_format_line(View& output_view) {
     vector<Column> col_list = output_view.get_column_list();
     int col_num = col_list.size();
-    if (col_num == 0) {
-        cout << "Empty set" << endl;
-        return;
-    }
     cout << "+";
     for (int i = 0; i < col_num; i++) {
         int col_width = col_list[i].calculate_col_width();
@@ -443,9 +440,11 @@ vector<Column> Parser::analyse_pattern_spec() {
                             target_span_list[loop_out].word_end_pos_ = link_span_list_behind[loop_inner].word_end_pos_;
 
                             // new or modify the corresponding mark
-                            if (target_span_list[loop_out].pattern_col_marks.size() > j+1) {
-                                target_span_list[loop_out].pattern_col_marks[j+1] = link_span_list_behind[loop_inner].end_pos_;
+                            if (target_span_list[loop_out].pattern_col_marks.size() > j*2+1) {
+                                target_span_list[loop_out].pattern_col_marks[j*2] = link_span_list_behind[loop_inner].start_pos_;
+                                target_span_list[loop_out].pattern_col_marks[j*2+1] = link_span_list_behind[loop_inner].end_pos_;
                             } else {
+                                target_span_list[loop_out].pattern_col_marks.push_back(link_span_list_behind[loop_inner].start_pos_);
                                 target_span_list[loop_out].pattern_col_marks.push_back(link_span_list_behind[loop_inner].end_pos_);
                             }
                             if (DEBUG) cout << doc_str.substr(target_span_list[loop_out].start_pos_, target_span_list[loop_out].end_pos_ - target_span_list[loop_out].start_pos_) << endl;
@@ -478,9 +477,11 @@ vector<Column> Parser::analyse_pattern_spec() {
                             Span possible_span = target_span_list[loop_out];
                             possible_span.end_pos_ = link_span_list_behind[loop_inner].end_pos_;
                             possible_span.word_end_pos_ = link_span_list_behind[loop_inner].word_end_pos_;
-                            if (target_span_list[loop_out].pattern_col_marks.size() > j+1) {
-                                possible_span.pattern_col_marks[j+1] = link_span_list_behind[loop_inner].end_pos_;
+                            if (target_span_list[loop_out].pattern_col_marks.size() > j*2+1) {
+                                possible_span.pattern_col_marks[j*2] = link_span_list_behind[loop_inner].start_pos_;
+                                possible_span.pattern_col_marks[j*2+1] = link_span_list_behind[loop_inner].end_pos_;
                             } else {
+                                possible_span.pattern_col_marks.push_back(link_span_list_behind[loop_inner].start_pos_);
                                 possible_span.pattern_col_marks.push_back(link_span_list_behind[loop_inner].end_pos_);
                             }
 
@@ -523,13 +524,13 @@ vector<Column> Parser::analyse_pattern_spec() {
         vector<Span> target_span_list;
 
         int s_col = wanted_groups[i].start_col_seq_;
-        int e_col = wanted_groups[i].end_col_seq_+1;
+        int e_col = wanted_groups[i].end_col_seq_;
 
         // cout << i << " groups need col" << wanted_groups[i].start_col_seq_ << " to " << wanted_groups[i].end_col_seq_ << endl;
 
         for (int inner = 0 ; inner < cmp_span_list.size(); inner++) {
-            int s_col_in_sub_span = cmp_span_list[inner].pattern_col_marks[s_col];
-            int e_col_in_sub_span = cmp_span_list[inner].pattern_col_marks[e_col];
+            int s_col_in_sub_span = cmp_span_list[inner].pattern_col_marks[s_col*2];
+            int e_col_in_sub_span = cmp_span_list[inner].pattern_col_marks[e_col*2+1];
             Span sub_span(s_col_in_sub_span, e_col_in_sub_span, doc_str.substr(s_col_in_sub_span, e_col_in_sub_span - s_col_in_sub_span));
             target_span_list.push_back(sub_span);
         }
