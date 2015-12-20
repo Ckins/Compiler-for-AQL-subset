@@ -12,13 +12,17 @@ class Span {
     int start_pos_;
     int end_pos_;
     string value_;
-    void display() {
-        cout << value_ << "(" << start_pos_ << "," << end_pos_ << ")" << endl;
-    }
+    vector<int> pattern_col_marks;
     Span() { }
     Span(int s = 0, int e = 0, string v = "") :
         start_pos_(s), end_pos_(e), value_(v) {}
     ~Span() { } 
+
+    void display() {
+        cout << value_ << "(" << start_pos_ << "," << end_pos_ << ")" << endl;
+    }
+
+
 };
 
 class GroupRecord {
