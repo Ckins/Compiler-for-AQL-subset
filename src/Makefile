@@ -1,5 +1,5 @@
 OBJS = main.o regex.o tokenizer.o lexer.o code_token.o parser.o column.o view.o
-CC = g++ -std=c++11
+CC = g++
 DEBUG = -g
 CFLAGS = -Wall -c $(DEBUG)
 LFLAGS = -Wall $(DEBUG)

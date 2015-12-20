@@ -135,8 +135,8 @@ void Parser::print_format_span(View& output_view) {
             string single_span = "";
             if (j < col_list[i].get_span_list().size()) {
                 single_span = col_list[i].get_span_list()[j].value_+":("
-                + to_string(col_list[i].get_span_list()[j].start_pos_) + ','
-                + to_string(col_list[i].get_span_list()[j].end_pos_) + ')';
+                + this->to_string(col_list[i].get_span_list()[j].start_pos_) + ','
+                + this->to_string(col_list[i].get_span_list()[j].end_pos_) + ')';
             }       
             cout << setiosflags( ios::left );
             cout << ' ' << setw(col_width-1) << single_span;
@@ -1071,4 +1071,12 @@ vector<Span> Parser::get_standard_word_span_list_() {
         standard_list.push_back(tmp);
     }
     return standard_list;
+}
+
+string Parser::to_string(int num) {
+    string Result;
+    stringstream convert;
+    convert << num;
+    Result = convert.str();
+    return Result;
 }

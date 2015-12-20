@@ -18,6 +18,7 @@ class Column{
     void set_list(vector<Span> v);
     int calculate_col_width();
     int get_col_width();
+    string to_string(int num);
 
   private:
     std::vector<Span> span_list_;

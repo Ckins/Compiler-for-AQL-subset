@@ -11,6 +11,7 @@
 #include "view.h"
 #include "column.h"
 #include "span.h"
+#include <sstream>
 
 using namespace std;
 
@@ -71,6 +72,7 @@ class Parser {
     bool assert_next_peek_is_match(const char*reserve);
     bool assert_next_peek_has_type(int tag);
     void error(string func);
+    string to_string(int num);
 
   private:
     vector<CodeToken> lexer_list_;
