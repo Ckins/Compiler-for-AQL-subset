@@ -13,13 +13,18 @@ class Span {
     int end_pos_;
     string value_;
     vector<int> pattern_col_marks;
+
+    int word_start_pos_;
+    int word_end_pos_;
+
     Span() { }
     Span(int s = 0, int e = 0, string v = "") :
         start_pos_(s), end_pos_(e), value_(v) {}
     ~Span() { } 
 
     void display() {
-        cout << value_ << "(" << start_pos_ << "," << end_pos_ << ")" << endl;
+        cout << value_ << "(" << start_pos_ << "," << end_pos_ << ") " 
+            "word_pos : " << word_start_pos_ <<" to " << word_end_pos_ << endl;
     }
 
 

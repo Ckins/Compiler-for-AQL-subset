@@ -10,6 +10,10 @@ findall(const char *regex, const char *content);
 
 Parser::Parser(vector<CodeToken> lexer_list, const Tokenizer &t) {
 
+    if (DEBUG) {
+        t.display();
+    }
+
     lexer_list_ = lexer_list;
     doc_token_list_ = t.get_doc_token_list();
     peek_pos_ = 0;
@@ -28,6 +32,8 @@ Parser::Parser(vector<CodeToken> lexer_list, const Tokenizer &t) {
     View Document("Document");
     Document.add_column(text);
     view_list_.push_back(Document);
+
+    standard_word_span_list_ = get_standard_word_span_list_();
 
     analyse_program();
 }
@@ -354,6 +360,7 @@ vector<Column> Parser::analyse_pattern_spec() {
             View tmp_view = get_view_by_alias(all_atoms[i].view_alias_);
             content_col = tmp_view.get_column_by_name(all_atoms[i].col_name_);
         }
+        calculate_span_word_seq(content_col);
         content_base.push_back(content_col);
     }
 
@@ -454,31 +461,31 @@ vector<Column> Parser::analyse_pattern_spec() {
             }
 
             //maximun limit
-            for (int k = 0; k < all_atoms[j].repeat_max_-all_atoms[j].repeat_min_;k++) {
+            // for (int k = 0; k < all_atoms[j].repeat_max_-all_atoms[j].repeat_min_;k++) {
 
-                unsigned int origin_size = target_span_list.size();
-                for (int loop_out = 0; loop_out < origin_size; loop_out++) {
-                    for (int loop_inner = 0; loop_inner < link_span_list_behind.size(); loop_inner++) {
-                        if (target_span_list[loop_out].end_pos_ == link_span_list_behind[loop_inner].start_pos_
-                            || (target_span_list[loop_out].end_pos_+1) == link_span_list_behind[loop_inner].start_pos_) {
+            //     unsigned int origin_size = target_span_list.size();
+            //     for (int loop_out = 0; loop_out < origin_size; loop_out++) {
+            //         for (int loop_inner = 0; loop_inner < link_span_list_behind.size(); loop_inner++) {
+            //             if (target_span_list[loop_out].end_pos_ == link_span_list_behind[loop_inner].start_pos_
+            //                 || (target_span_list[loop_out].end_pos_+1) == link_span_list_behind[loop_inner].start_pos_) {
 
-                            // link
-                            // Span possible_span(target_span_list[loop_out].start_pos_, link_span_list_behind[loop_inner].end_pos_, string("new one"));
-                            Span possible_span = target_span_list[loop_out];
-                            possible_span.end_pos_ = link_span_list_behind[loop_inner].end_pos_;
-                            if (target_span_list[loop_out].pattern_col_marks.size() > j+1) {
-                                possible_span.pattern_col_marks[j+1] = link_span_list_behind[loop_inner].end_pos_;
-                            } else {
-                                possible_span.pattern_col_marks.push_back(link_span_list_behind[loop_inner].end_pos_);
-                            }
+            //                 // link
+            //                 // Span possible_span(target_span_list[loop_out].start_pos_, link_span_list_behind[loop_inner].end_pos_, string("new one"));
+            //                 Span possible_span = target_span_list[loop_out];
+            //                 possible_span.end_pos_ = link_span_list_behind[loop_inner].end_pos_;
+            //                 if (target_span_list[loop_out].pattern_col_marks.size() > j+1) {
+            //                     possible_span.pattern_col_marks[j+1] = link_span_list_behind[loop_inner].end_pos_;
+            //                 } else {
+            //                     possible_span.pattern_col_marks.push_back(link_span_list_behind[loop_inner].end_pos_);
+            //                 }
 
-                            target_span_list.push_back(possible_span);
-                            loop_out++;
-                            break;
-                        }
-                    }
-                }
-            }  
+            //                 target_span_list.push_back(possible_span);
+            //                 loop_out++;
+            //                 break;
+            //             }
+            //         }
+            //     }
+            // }  
         }
 
         for (int seq = 0; seq < target_span_list.size(); seq++) {
@@ -502,7 +509,7 @@ vector<Column> Parser::analyse_pattern_spec() {
         int s_col = wanted_groups[i].start_col_seq_;
         int e_col = wanted_groups[i].end_col_seq_+1;
 
-        cout << i << " groups need col" << wanted_groups[i].start_col_seq_ << " to " << wanted_groups[i].end_col_seq_ << endl;
+        // cout << i << " groups need col" << wanted_groups[i].start_col_seq_ << " to " << wanted_groups[i].end_col_seq_ << endl;
 
         for (int inner = 0 ; inner < cmp_span_list.size(); inner++) {
             int s_col_in_sub_span = cmp_span_list[inner].pattern_col_marks[s_col];
@@ -997,4 +1004,33 @@ Column Parser::get_column_as_regex(string reg) {
     }
 
     return single_column;
+}
+
+void Parser::calculate_span_word_seq(Column &content_col) {
+    vector<Span> tmp_list = content_col.get_span_list();
+    for (unsigned int i = 0; i < tmp_list.size(); i++) {
+        for (unsigned j = 0; j < standard_word_span_list_.size(); j++) {
+            if (tmp_list[i].start_pos_ >= standard_word_span_list_[j].start_pos_ &&
+                tmp_list[i].start_pos_ < standard_word_span_list_[j].end_pos_) {
+                tmp_list[i].word_start_pos_ = standard_word_span_list_[j].word_start_pos_;
+            }
+
+            if (tmp_list[i].end_pos_-1 >= standard_word_span_list_[j].start_pos_ &&
+                tmp_list[i].end_pos_ <= standard_word_span_list_[j].end_pos_) {
+                tmp_list[i].word_end_pos_ = standard_word_span_list_[j].word_start_pos_;
+            }
+        }
+    }
+    content_col.set_list(tmp_list);
+}
+
+vector<Span> Parser::get_standard_word_span_list_() {
+    vector<Span> standard_list;
+    for (unsigned int i = 0; i < doc_token_list_.size();i++) {
+        Span tmp(doc_token_list_[i].start_pos_, doc_token_list_[i].end_pos_, doc_token_list_[i].content_);
+        tmp.word_start_pos_ = doc_token_list_[i].word_num_;
+        tmp.word_end_pos_ = doc_token_list_[i].word_num_;
+        standard_list.push_back(tmp);
+    }
+    return standard_list;
 }

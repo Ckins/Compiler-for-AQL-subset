@@ -7,6 +7,7 @@ using namespace std;
 
 Tokenizer::Tokenizer(const char* file) {
     std::string tmp(file);
+    word_num_ = 0;
     file_name_ = tmp;
     whole_string_ = "";
     make_token();
@@ -21,7 +22,8 @@ void Tokenizer::display() const {
     cout << doc_vector_.size() << endl;
     int i;
     for ( i = 0; i < doc_vector_.size(); i++) {
-        std::cout << doc_vector_[i].content_ << "(" << doc_vector_[i].start_pos_ << ", " << doc_vector_[i].end_pos_ << ")\n";
+        std::cout << doc_vector_[i].content_ << "(" << doc_vector_[i].start_pos_ 
+            << ", " << doc_vector_[i].end_pos_ << ") " << "word_num_ : " << doc_vector_[i].word_num_ << endl;
     }
 }
 
@@ -47,7 +49,7 @@ void Tokenizer::make_token() {
         if (is_num_or_letter(single_char)) {
             token_content += single_char;
         } else {
-            doc_vector_.push_back(DocToken(token_start, pos, token_content));
+            doc_vector_.push_back(DocToken(token_start, pos, token_content, word_num_++));
             if (single_char == ' ' || single_char == '\n') {
                 token_content = std::string("");
                 token_start = pos;

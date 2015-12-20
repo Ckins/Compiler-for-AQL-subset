@@ -1,7 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-#define DEBUG false
+#define DEBUG true
 
 #include <iostream>
 #include <vector>
@@ -50,6 +50,9 @@ class Parser {
     Column get_column_from_tokenizer();
     Column get_column_as_regex(string regex);
 
+    void calculate_span_word_seq(Column &content_col);
+    vector<Span> get_standard_word_span_list_();
+
     //data operation
     View get_view_by_alias(string alias);
     View get_view_by_name(string name);
@@ -72,6 +75,7 @@ class Parser {
   private:
     vector<CodeToken> lexer_list_;
     vector<DocToken> doc_token_list_;
+    vector<Span> standard_word_span_list_;
 
     //for scan
     bool is_end_;

@@ -12,12 +12,14 @@ class DocToken {
     int start_pos_;
     int end_pos_;
     std::string content_;
-    DocToken(int s = 0, int e = 0, std::string c = 0) : 
-        start_pos_(s), end_pos_(e), content_(c) {}
+    int word_num_;
+    DocToken(int s = 0, int e = 0, std::string c = "", int w = 0) : 
+        start_pos_(s), end_pos_(e), content_(c), word_num_(w) { }
 };
 
 class Tokenizer {
   public:
+    int word_num_;
     vector<DocToken> doc_vector_;
     string file_name_;
     string whole_string_;
