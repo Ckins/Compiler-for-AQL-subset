@@ -50,7 +50,7 @@ CodeToken::CodeToken(const CodeToken &tok) {
 string CodeToken::toString() {
     // number
     if (tag_ == Tag::NUM) {
-        return string("")+SSTR(num_value_);
+        return to_string(num_value_);
     } else {
         return lexme_;
     }

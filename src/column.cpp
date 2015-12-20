@@ -40,8 +40,8 @@ int Column::calculate_col_width() {
     int length = span_list_.size();
     int max = col_name_.length()+2;
     for (int i = 0; i < length; i++) {
-        int tmp = span_list_[i].value_.length()+SSTR(span_list_[i].start_pos_).length()+
-            SSTR(span_list_[i].end_pos_).length()+6;
+        int tmp = span_list_[i].value_.length()+to_string(span_list_[i].start_pos_).length()+
+            to_string(span_list_[i].end_pos_).length()+6;
         if (tmp > max) {
             max = tmp;
         }
