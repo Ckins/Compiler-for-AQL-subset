@@ -110,9 +110,15 @@ void Parser::print_view(View& output_view) {
     print_format_span(output_view);
     print_format_line(output_view);
 
-    cout << output_view.get_column_list()[0].get_span_list().size();
-    cout << " rows in set";
-    if (!is_end_) cout << endl;
+    if (!output_view.is_empty()) {
+        cout << output_view.get_column_list()[0].get_span_list().size();
+        cout << " rows in set";
+    } else {
+        cout << "Empty set";
+    }
+
+    // to determin
+    cout << endl;
 }
 
 //| Georgia:(20,27)    | Plains, Georgia:(12,27)        | Plains:(12,18)       |

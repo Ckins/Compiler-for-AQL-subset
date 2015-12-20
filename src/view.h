@@ -18,6 +18,7 @@ class View {
     string get_alias();
     Column get_column_by_name(string name);
     int calculate_row_num();
+    bool is_empty();
 
   private:
     std::vector<Column> column_list_;

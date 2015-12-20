@@ -59,3 +59,14 @@ int View::calculate_row_num() {
     }
     return res;
 }
+
+bool View::is_empty() {
+    bool is_empty = true;
+    for (unsigned int i = 0; i < column_list_.size(); i++) {
+        if (column_list_[i].get_span_list().size() != 0) {
+            is_empty = false;
+            break;
+        }
+    }
+    return is_empty;
+}
