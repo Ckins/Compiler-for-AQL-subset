@@ -423,23 +423,24 @@ vector<Column> Parser::analyse_pattern_spec() {
             Column link_col_behind = content_base[j];
             vector<Span> link_span_list_behind = link_col_behind.get_span_list();
 
-            if (DEBUG) {
-                cout << "target-size " << target_span_list.size() << endl;
-            }
             //minial required, need to erase the unlinkable spans
             for (int k = 0; k < all_atoms[j].repeat_min_;k++) {
-
+                if (DEBUG) {
+                    cout << "-----------------repeat min------------------\n" << link_col_behind.get_name() << endl;
+                }
                 for (int loop_out = 0; loop_out < target_span_list.size(); loop_out++) {
                     bool is_link = false;
                     for (int loop_inner = 0; loop_inner < link_span_list_behind.size(); loop_inner++) {
-                        if (target_span_list[loop_out].end_pos_ == link_span_list_behind[loop_inner].start_pos_
-                            || (target_span_list[loop_out].end_pos_+1) == link_span_list_behind[loop_inner].start_pos_) {
+                        if (target_span_list[loop_out].end_pos_ <= link_span_list_behind[loop_inner].start_pos_
+                            && (link_span_list_behind[loop_inner].word_start_pos_ - target_span_list[loop_out].word_end_pos_>= 0)
+                            && (link_span_list_behind[loop_inner].word_start_pos_ - target_span_list[loop_out].word_end_pos_<= 1)) {
                             is_link = true;
 
                             // link
                             //Span possible_span(target_span_list[loop_out].start_pos_, link_span_list_behind[loop_inner].end_pos_, string("new one"));
                             //target_span_list.push_back(possible_span);
                             target_span_list[loop_out].end_pos_ = link_span_list_behind[loop_inner].end_pos_;
+                            target_span_list[loop_out].word_end_pos_ = link_span_list_behind[loop_inner].word_end_pos_;
 
                             // new or modify the corresponding mark
                             if (target_span_list[loop_out].pattern_col_marks.size() > j+1) {
@@ -447,45 +448,60 @@ vector<Column> Parser::analyse_pattern_spec() {
                             } else {
                                 target_span_list[loop_out].pattern_col_marks.push_back(link_span_list_behind[loop_inner].end_pos_);
                             }
+                            if (DEBUG) cout << doc_str.substr(target_span_list[loop_out].start_pos_, target_span_list[loop_out].end_pos_ - target_span_list[loop_out].start_pos_) << endl;
                             break;
                         }
                     }
                     vector<Span>::iterator it = target_span_list.begin();
                     if (!is_link) {
-                        // cout << doc_str.substr(target_span_list[loop_out].start_pos_, target_span_list[loop_out].end_pos_ - target_span_list[loop_out].start_pos_) << endl;
                         //cout << target_span_list[loop_out].start_pos_ << "to" << target_span_list[loop_out].end_pos_ << endl;
                         target_span_list.erase(it+loop_out);
                         loop_out--;
                     }
                 }
+                if (DEBUG) cout << "------------------------------------------------\n\n\n\n\n";
             }
 
             //maximun limit
-            // for (int k = 0; k < all_atoms[j].repeat_max_-all_atoms[j].repeat_min_;k++) {
+            // cout << all_atoms[j].repeat_max_-all_atoms[j].repeat_min_ << endl;
+            for (int k = 0; k < all_atoms[j].repeat_max_-all_atoms[j].repeat_min_;k++) {
+                if (DEBUG) cout << "-----------------repeat max------------------\n" << k << link_col_behind.get_name() << endl;
+                unsigned int origin_size = target_span_list.size();
+                for (int loop_out = 0; loop_out < origin_size; loop_out++) {
+                    for (int loop_inner = 0; loop_inner < link_span_list_behind.size(); loop_inner++) {
+                        if (target_span_list[loop_out].end_pos_ <= link_span_list_behind[loop_inner].start_pos_
+                            && (link_span_list_behind[loop_inner].word_start_pos_ - target_span_list[loop_out].word_end_pos_> 0)
+                            && (link_span_list_behind[loop_inner].word_start_pos_ - target_span_list[loop_out].word_end_pos_<= 1)) {
 
-            //     unsigned int origin_size = target_span_list.size();
-            //     for (int loop_out = 0; loop_out < origin_size; loop_out++) {
-            //         for (int loop_inner = 0; loop_inner < link_span_list_behind.size(); loop_inner++) {
-            //             if (target_span_list[loop_out].end_pos_ == link_span_list_behind[loop_inner].start_pos_
-            //                 || (target_span_list[loop_out].end_pos_+1) == link_span_list_behind[loop_inner].start_pos_) {
+                            // link
+                            // Span possible_span(target_span_list[loop_out].start_pos_, link_span_list_behind[loop_inner].end_pos_, string("new one"));
+                            Span possible_span = target_span_list[loop_out];
+                            possible_span.end_pos_ = link_span_list_behind[loop_inner].end_pos_;
+                            possible_span.word_end_pos_ = link_span_list_behind[loop_inner].word_end_pos_;
+                            if (target_span_list[loop_out].pattern_col_marks.size() > j+1) {
+                                possible_span.pattern_col_marks[j+1] = link_span_list_behind[loop_inner].end_pos_;
+                            } else {
+                                possible_span.pattern_col_marks.push_back(link_span_list_behind[loop_inner].end_pos_);
+                            }
 
-            //                 // link
-            //                 // Span possible_span(target_span_list[loop_out].start_pos_, link_span_list_behind[loop_inner].end_pos_, string("new one"));
-            //                 Span possible_span = target_span_list[loop_out];
-            //                 possible_span.end_pos_ = link_span_list_behind[loop_inner].end_pos_;
-            //                 if (target_span_list[loop_out].pattern_col_marks.size() > j+1) {
-            //                     possible_span.pattern_col_marks[j+1] = link_span_list_behind[loop_inner].end_pos_;
-            //                 } else {
-            //                     possible_span.pattern_col_marks.push_back(link_span_list_behind[loop_inner].end_pos_);
-            //                 }
-
-            //                 target_span_list.push_back(possible_span);
-            //                 loop_out++;
-            //                 break;
-            //             }
-            //         }
-            //     }
-            // }  
+                            // to see if there exits!!!!!!!!!
+                            bool repeat_flag = false;
+                            for (unsigned int repeat_loop = 0; repeat_loop < target_span_list.size(); repeat_loop++) {
+                                if (target_span_list[repeat_loop] == possible_span) {
+                                    repeat_flag = true;
+                                    break;
+                                }
+                            }
+                            if (!repeat_flag) {
+                                target_span_list.push_back(possible_span);
+                                if (DEBUG) cout << doc_str.substr(possible_span.start_pos_, possible_span.end_pos_ - possible_span.start_pos_) << endl;
+                                break;
+                            }    
+                        }
+                    }
+                }
+                if (DEBUG) cout << "------------------------------------------------\n\n\n\n\n";
+            }  
         }
 
         for (int seq = 0; seq < target_span_list.size(); seq++) {
@@ -524,6 +540,20 @@ vector<Column> Parser::analyse_pattern_spec() {
 
     //skip from_list stmt;
     analyse_from_list();
+
+    //orgnise in dictionary order
+    for (unsigned int i = 0; i < result_vector_of_column.size(); i++) {
+        unsigned int choice = i;
+        Column min = result_vector_of_column[i];
+        for (unsigned int j = i+1; j < result_vector_of_column.size(); j++) {
+            if (result_vector_of_column[j].get_name() < min.get_name()) {
+                choice = j;
+            }
+        }
+        Column tmp = result_vector_of_column[i];
+        result_vector_of_column[i] = result_vector_of_column[choice];
+        result_vector_of_column[choice] = tmp;
+    }
 
     return result_vector_of_column;
 }
@@ -972,6 +1002,7 @@ Column Parser::get_column_from_tokenizer() {
         Span tmp(doc_token_list_[i].start_pos_, doc_token_list_[i].end_pos_, doc_token_list_[i].content_);
         res_col.add_span(tmp);
     }
+    res_col.set_name("Token_Column");
     return res_col;
 }
 
@@ -1002,7 +1033,7 @@ Column Parser::get_column_as_regex(string reg) {
             }
         }
     }
-
+    single_column.set_name("REGEX_COLUMN");
     return single_column;
 }
 

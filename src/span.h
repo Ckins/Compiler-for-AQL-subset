@@ -27,6 +27,9 @@ class Span {
             "word_pos : " << word_start_pos_ <<" to " << word_end_pos_ << endl;
     }
 
+    bool operator==(const Span &sp) {
+        return (this->start_pos_ == sp.start_pos_ && this->end_pos_ == sp.end_pos_);
+    }
 
 };
 
