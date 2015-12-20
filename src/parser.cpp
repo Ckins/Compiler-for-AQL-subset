@@ -966,7 +966,7 @@ void Parser::reset_all_view_alias() {
 }
 
 void Parser::step_back() {
-    if (!peek_pos_ <= 0) {
+    if (!(peek_pos_ <= 0)) {
         peek_pos_--;
     }
     peek_ = lexer_list_[peek_pos_];
