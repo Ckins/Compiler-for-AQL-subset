@@ -1,8 +1,3 @@
-create view Hap as
-  extract regex /nihaoma/
-    on D.text as Cap
-  from Document D;
-
 create view Cap as
   extract regex /[A-Z][a-z]*/
     on D.text as Cap
@@ -39,7 +34,6 @@ create view PerLocOnly as
   from PerLoc PL;
 
 output view Cap;
-output view Hap;
 output view Stt;
 output view Loc;
 output view Per;

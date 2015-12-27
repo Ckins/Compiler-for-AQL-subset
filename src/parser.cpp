@@ -104,13 +104,14 @@ void Parser::print_view(View& output_view) {
         cout  << endl << "View: "<< output_view.get_alias() << endl;
     }
 
-    print_format_line(output_view);
-    print_format_column(output_view);
-    print_format_line(output_view);
-    print_format_span(output_view);
-    print_format_line(output_view);
-
     if (!output_view.is_empty()) {
+
+        print_format_line(output_view);
+        print_format_column(output_view);
+        print_format_line(output_view);
+        print_format_span(output_view);
+        print_format_line(output_view);
+
         cout << output_view.get_column_list()[0].get_span_list().size();
         cout << " rows in set";
     } else {
