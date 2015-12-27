@@ -1,0 +1,26 @@
+create view RepublicanCandidate as
+    extract regex /(Hillary )?Clinton|(Bernie )?Sanders|(Martin )?O'Malley|(Lincoln )?Chafee|(Jim )?Webb/
+        on D.text as republicanCandidate
+    from Document D;
+
+create view DemocratCandidate as 
+    extract regex /(Jeb )?Bush|(Marco )?Rubio|(Scott )?Walker|(Ben )?Carson|(Mike )?Huckabee|(Rand )?Paul|(Rick )?Perry|(Chris )?Christie|(Ted )?Cruz/
+        on D.text as DemocratCandidate
+    from Document D;
+
+create view Ratio as
+	extract regex /[0-9]+(\.[0-9])?%/
+		on D.text as ratio
+	from Document D;
+
+create view Candidate1WithRatio as
+    extract pattern (<R.republicanCandidate>) <Token>{1,20} (<T.ratio>)
+        return group 0 as Candidate1WithRatio
+           and group 1 as RepublicanCandidate
+           and group 2 as Ratio
+        from RepublicanCandidate R, Ratio T;
+        
+output view RepublicanCandidate;
+output view DemocratCandidate;
+output view Ratio;
+output view Candidate1WithRatio;

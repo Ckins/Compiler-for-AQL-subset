@@ -24,7 +24,7 @@ class Tokenizer {
     string file_name_;
     string whole_string_;
 
-    Tokenizer(const char* file);
+    Tokenizer(std::string file);
 
     void make_token();
 

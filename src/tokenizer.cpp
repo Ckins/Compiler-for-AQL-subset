@@ -5,10 +5,9 @@
 
 using namespace std;
 
-Tokenizer::Tokenizer(const char* file) {
-    std::string tmp(file);
+Tokenizer::Tokenizer(std::string file) {
     word_num_ = 0;
-    file_name_ = tmp;
+    file_name_ = file;
     whole_string_ = "";
     make_token();
 }
@@ -33,7 +32,7 @@ string Tokenizer::get_all_as_string() const{
 
 void Tokenizer::make_token() {
     std::ifstream ifile;
-    ifile.open(("./../dataset/"+file_name_).c_str());
+    ifile.open((file_name_).c_str());
     
     // @param pos : locate the postion in the document
     char single_char;

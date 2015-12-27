@@ -7,8 +7,7 @@ LFLAGS = -Wall $(DEBUG)
 AQL : $(OBJS)
 	$(CC) $(LFLAGS) $(OBJS) -o AQL
 	-rm *.o
-	./AQL PerLoc.aql PerLoc.input > output1
-	./AQL Revenue.aql Revenue.input > output2
+	./AQL PerLoc.aql folder
 
 main.o : tokenizer.h code_token.h lexer.h parser.h
 	$(CC) $(CFLAGS) main.cpp
@@ -34,8 +33,14 @@ column.o : tokenizer.h column.h
 view.o : column.h view.h
 	$(CC) $(CFLAGS) view.cpp
 
-test:
+test1:
 	./AQL PerLoc.aql PerLoc.input
+
+test2:
+	./AQL Revenue.aql Revenue.input
+
+test3:
+	./AQL 2016.aql news1.input
 
 .PHONY : clean
 clean:
