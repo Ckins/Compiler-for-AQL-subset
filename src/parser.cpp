@@ -62,6 +62,7 @@ void Parser::analyse_aql_stmt() {
         //cout << "create stmt" << endl;
         analyse_create_stmt();
     } else if (peek_is_match("output")) {
+        if (DEBUG) cout << "create stmt" << endl;
         analyse_output_stmt();
     } else {
         error("analyse_aql_stmt()");
@@ -322,7 +323,7 @@ vector<Column> Parser::analyse_extract_stmt() {
     peek_ = lexer_list_[peek_pos_-1];
     //extract_spec
     if (peek_is_match("regex")) {
-        
+        if (DEBUG) cout << "regex_spec" << endl;
         result_vector = (analyse_regex_spec());
     } else if (peek_is_match("pattern")) {
         if (DEBUG) cout << "pattern_spec" << endl;
@@ -330,7 +331,7 @@ vector<Column> Parser::analyse_extract_stmt() {
     } else {
         error("analyse_extract_stmt()");
     }
-
+    if (DEBUG) cout << "returning to extract stmt\n";
     return result_vector;
 }
 
@@ -416,6 +417,10 @@ vector<Column> Parser::analyse_pattern_spec() {
         // target_span_list contains the result of the linking !!!
         Column group_n = content_base[wanted_groups[i].start_col_seq_];
         group_n.set_name(wanted_groups[i].column_id_);
+
+        // null column has no member!
+
+
         vector<Span> target_span_list = group_n.get_span_list();
 
         for (int j = 0; j < target_span_list.size();j++) {
@@ -533,7 +538,7 @@ vector<Column> Parser::analyse_pattern_spec() {
         int s_col = wanted_groups[i].start_col_seq_;
         int e_col = wanted_groups[i].end_col_seq_;
 
-        // cout << i << " groups need col" << wanted_groups[i].start_col_seq_ << " to " << wanted_groups[i].end_col_seq_ << endl;
+        if (DEBUG) cout << i << " groups need col" << wanted_groups[i].start_col_seq_ << " to " << wanted_groups[i].end_col_seq_ << endl;
 
         for (int inner = 0 ; inner < cmp_span_list.size(); inner++) {
             int s_col_in_sub_span = cmp_span_list[inner].pattern_col_marks[s_col*2];
@@ -563,6 +568,7 @@ vector<Column> Parser::analyse_pattern_spec() {
         result_vector_of_column[choice] = tmp;
     }
 
+    if (DEBUG) cout << "finish pattern\n";
     return result_vector_of_column;
 }
 
@@ -715,7 +721,7 @@ Atom Parser::analyse_atom() {
 vector<Column> Parser::analyse_regex_spec() {
     vector<Column> result_vector_of_column;
 
-    //get REG
+    if (DEBUG) cout << "get REG\n";
     string reg = "";
 
     //remember the regex codeToken to analyse later
@@ -728,7 +734,7 @@ vector<Column> Parser::analyse_regex_spec() {
     //View name, Col name
     vector<CodeToken> column_ids = analyse_colomn(); 
 
-    //analyse name_spec, and remember
+    if (DEBUG) cout << "analyse name_spec, and remember\n";
     vector<GroupRecord> group_records = analyse_name_spec();
 
     //really extract here
@@ -737,20 +743,25 @@ vector<Column> Parser::analyse_regex_spec() {
     Column source_column = source_view.get_column_by_name(column_ids[1].toString());
 
     int group_length = group_records.size();
+
+    if (DEBUG) cout << "group_records.size() " << group_length << endl;
+
     for (int group_seq = 0; group_seq < group_length; group_seq++) {
         Column single_column;
         single_column.set_name(group_records[group_seq].column_id_);
-        //cout << group_records[group_seq].column_id_ << endl;
+        if (DEBUG) cout << group_records[group_seq].column_id_ << endl;
 
         vector<vector<int> >result_from_engine;
 
-        vector<Span>::iterator span_it = source_column.get_span_list().begin();
-        vector<Span>::iterator span_end = source_column.get_span_list().end();
+        int span_it = 0;
 
-        for (; span_it != span_end; span_it++) {
-            string str = (*span_it).value_;
+        if (DEBUG) cout << "span-size --->" << source_column.get_span_list().size() << endl;
+
+        for (; span_it < source_column.get_span_list().size(); span_it++) {
+            string str = source_column.get_span_list()[span_it].value_;
+            if (DEBUG) cout << source_column.get_span_list()[span_it].value_ << endl;
             result_from_engine = findall(reg.c_str(), str.c_str());
-            //cout << "result_from_engine : " <<result_from_engine.size() << endl;
+            if (DEBUG) cout << "result_from_engine : " <<result_from_engine.size() << endl;
             int length = result_from_engine.size();
             for (int i = 0; i < length; i++) {
 
@@ -769,8 +780,10 @@ vector<Column> Parser::analyse_regex_spec() {
         result_vector_of_column.push_back(single_column);
     }
 
-    //skip from_list stmt;
+    if (DEBUG) cout << "skip from_list stmt\n";
     analyse_from_list();
+
+    if (DEBUG) cout << "success reg analyse\n";
     
     return result_vector_of_column;
 }
@@ -1019,11 +1032,11 @@ Column Parser::get_column_as_regex(string reg) {
     View source_view = get_view_by_name("Document");
     Column source_column = source_view.get_column_by_name("text");
     vector<vector<int> >result_from_engine;
-    vector<Span>::iterator span_it = source_column.get_span_list().begin();
-    vector<Span>::iterator span_end = source_column.get_span_list().end();
+    int span_length = source_column.get_span_list().size();
+    int span_it = 0;
 
-    for (; span_it != span_end; span_it++) {
-        string str = (*span_it).value_;
+    for (; span_it < span_length; span_it++) {
+        string str = source_column.get_span_list()[span_it].value_;
         result_from_engine = findall(reg.c_str(), str.c_str());
         //cout << "result_from_engine : " <<result_from_engine.size() << endl;
         int length = result_from_engine.size();

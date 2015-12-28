@@ -14,20 +14,17 @@ create view Money as
 		   and group 1 as dollar
 		   and group 2 as number
 		   and group 3 as unit
-	from Number N, Unit U;
- 
+	from Number N, Unit U; 
 
 create view Revenue as
 	extract regex /revenues|revenue/ 
 		on D.text as revenue
 	from Document D;
 
-
 create view Division as 
 	extract regex /Global Technology Services|Systems and Technology|S&TG|Software|Global Financing|Global Business Services/  	
 		on R.text as division 
 	from Document R;  
-
 
 create view RevenueAndDivision as
     extract pattern <R.revenue> <Token>{1,3} (<D.division>) <Token>{1,20} (<M.money>)
@@ -44,7 +41,6 @@ create view RevenueAndDivision2 as
     from Revenue R, Division D, Money M;
 
 
-
 output view Number;
 output view Unit;
 output view Money;
@@ -52,6 +48,3 @@ output view Revenue;
 output view Division;
 output view RevenueAndDivision;
 output view RevenueAndDivision2;
-
-
-
