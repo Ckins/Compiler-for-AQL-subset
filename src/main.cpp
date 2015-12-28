@@ -51,14 +51,12 @@ int main(int argc, char**argv) {
 		// traverse the dir
 		while ((pdirent = readdir(d_info)) != NULL) {
 			if (pdirent->d_type & DT_REG) {   // is a file
-				int len = 0;
 				char* name = pdirent->d_name;
 				string file_name(name);
 
-				while (name[len] != '\0') len++;
 				// check if the file ends with .input
 				string end2(".input");
-				if (check_end_with(name, end2)) {
+				if (check_end_with(file_name, end2)) {
 					Tokenizer test("./../dataset/"+dataset_name+"/"+file_name);
 						
 					Lexer lexer(argv[1]);
@@ -67,13 +65,6 @@ int main(int argc, char**argv) {
 					Parser parser(v, test);
 
 					cout << endl << endl << divider << endl << endl << endl;
-				}
-				if (len > 6) {
-					if (name[len-1] == 't' && name[len-2] == 'u' && name[len-3] == 'p' && name[len-4] == 'n'
-						&& name[len-5] == 'i' && name[len-6] == '.') {
-						std::string file_name(name);
-						
-					}
 				}
 			}
 		}
