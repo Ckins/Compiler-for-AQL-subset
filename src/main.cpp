@@ -85,6 +85,7 @@ int main(int argc, char**argv) {
 			Tokenizer test(dataset_path);
 
 			Lexer lexer(argv[1]);
+
 			vector<CodeToken> v = lexer.get_list();
 
 			Parser parser(v, test);
@@ -110,11 +111,12 @@ bool check_end_with(string name, string end) {
 
 	int j = name_len-1;
 	int k = end_len-1;
-	for (int i = 0; i < name_len-end_len; i++) {
+	for (int i = 0; i < end_len; i++) {
 		if (name[j] != end[k]) return false;
 		j--;
 		k--;
 	}
+
 
 	return true;
 }
