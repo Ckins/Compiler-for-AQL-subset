@@ -371,8 +371,8 @@ vector<Column> Parser::analyse_pattern_spec() {
 
     if (DEBUG) {
         cout << "\n\n\n\n" << "test content cols\n";
-        for (int i = 0; i < content_base.size();i++) {
-            for (int j = 0; j < content_base[i].get_span_list().size();j++) {
+        for (int i = 0; (size_t)i < content_base.size();i++) {
+            for (int j = 0; (size_t)j < content_base[i].get_span_list().size();j++) {
                 content_base[i].get_span_list()[j].display();
             }
         }
@@ -381,9 +381,8 @@ vector<Column> Parser::analyse_pattern_spec() {
     
     //match group num to column_id
     vector<PatternGroup> wanted_groups;
-    for (int i = 0; i < group_records.size(); i++) {
-        int tmp_num = 0;
-        for (int j = 0; j < pattern_groups.size(); j++) {
+    for (int i = 0; (size_t)i < group_records.size(); i++) {
+        for (int j = 0; (size_t)j < pattern_groups.size(); j++) {
             if (pattern_groups[j].group_num_ == group_records[i].group_num_) {
                 pattern_groups[j].column_id_ = group_records[i].column_id_;
                 wanted_groups.push_back(pattern_groups[j]);
@@ -395,12 +394,12 @@ vector<Column> Parser::analyse_pattern_spec() {
 
     //debug information
     if (DEBUG) {
-        for (int i = 0; i < wanted_groups.size(); i++) {
+        for (int i = 0; (size_t)i < wanted_groups.size(); i++) {
             PatternGroup tmp_group = wanted_groups[i];
             cout << "group_num: " << tmp_group.group_num_ 
                 << "group_name: " << tmp_group.column_id_ 
                 << " from col " << tmp_group.start_col_seq_ << "to " << tmp_group.end_col_seq_ <<endl;
-            for (int j = 0; j < tmp_group.content_atoms_.size();j++) {
+            for (int j = 0; (size_t)j < tmp_group.content_atoms_.size();j++) {
                 cout << "type: " << tmp_group.content_atoms_[j].type_ <<endl;
                 cout << tmp_group.content_atoms_[j].view_alias_ << endl;
                 cout << "re-min: " << tmp_group.content_atoms_[j].repeat_min_ <<endl;
@@ -423,7 +422,7 @@ vector<Column> Parser::analyse_pattern_spec() {
 
         vector<Span> target_span_list = group_n.get_span_list();
 
-        for (int j = 0; j < target_span_list.size();j++) {
+        for (int j = 0; (size_t)j < target_span_list.size();j++) {
             target_span_list[j].pattern_col_marks.push_back(target_span_list[j].start_pos_);
             target_span_list[j].pattern_col_marks.push_back(target_span_list[j].end_pos_);
         }
@@ -437,9 +436,9 @@ vector<Column> Parser::analyse_pattern_spec() {
                 if (DEBUG) {
                     cout << "-----------------repeat min------------------\n" << link_col_behind.get_name() << endl;
                 }
-                for (int loop_out = 0; loop_out < target_span_list.size(); loop_out++) {
+                for (int loop_out = 0; (size_t)loop_out < target_span_list.size(); loop_out++) {
                     bool is_link = false;
-                    for (int loop_inner = 0; loop_inner < link_span_list_behind.size(); loop_inner++) {
+                    for (int loop_inner = 0; (size_t)loop_inner < link_span_list_behind.size(); loop_inner++) {
                         if (target_span_list[loop_out].end_pos_ <= link_span_list_behind[loop_inner].start_pos_
                             && (link_span_list_behind[loop_inner].word_start_pos_ - target_span_list[loop_out].word_end_pos_>= 0)
                             && (link_span_list_behind[loop_inner].word_start_pos_ - target_span_list[loop_out].word_end_pos_<= 1)) {
@@ -452,7 +451,7 @@ vector<Column> Parser::analyse_pattern_spec() {
                             target_span_list[loop_out].word_end_pos_ = link_span_list_behind[loop_inner].word_end_pos_;
 
                             // new or modify the corresponding mark
-                            if (target_span_list[loop_out].pattern_col_marks.size() > j*2+1) {
+                            if (target_span_list[loop_out].pattern_col_marks.size() > (size_t)(j*2+1)) {
                                 target_span_list[loop_out].pattern_col_marks[j*2] = link_span_list_behind[loop_inner].start_pos_;
                                 target_span_list[loop_out].pattern_col_marks[j*2+1] = link_span_list_behind[loop_inner].end_pos_;
                             } else {
@@ -478,8 +477,8 @@ vector<Column> Parser::analyse_pattern_spec() {
             for (int k = 0; k < all_atoms[j].repeat_max_-all_atoms[j].repeat_min_;k++) {
                 if (DEBUG) cout << "-----------------repeat max------------------\n" << k << link_col_behind.get_name() << endl;
                 unsigned int origin_size = target_span_list.size();
-                for (int loop_out = 0; loop_out < origin_size; loop_out++) {
-                    for (int loop_inner = 0; loop_inner < link_span_list_behind.size(); loop_inner++) {
+                for (int loop_out = 0; (size_t)loop_out < origin_size; loop_out++) {
+                    for (int loop_inner = 0; (size_t)loop_inner < link_span_list_behind.size(); loop_inner++) {
                         if (target_span_list[loop_out].end_pos_ <= link_span_list_behind[loop_inner].start_pos_
                             && (link_span_list_behind[loop_inner].word_start_pos_ - target_span_list[loop_out].word_end_pos_> 0)
                             && (link_span_list_behind[loop_inner].word_start_pos_ - target_span_list[loop_out].word_end_pos_<= 1)) {
@@ -489,7 +488,7 @@ vector<Column> Parser::analyse_pattern_spec() {
                             Span possible_span = target_span_list[loop_out];
                             possible_span.end_pos_ = link_span_list_behind[loop_inner].end_pos_;
                             possible_span.word_end_pos_ = link_span_list_behind[loop_inner].word_end_pos_;
-                            if (target_span_list[loop_out].pattern_col_marks.size() > j*2+1) {
+                            if (target_span_list[loop_out].pattern_col_marks.size() > (size_t)(j*2+1)) {
                                 possible_span.pattern_col_marks[j*2] = link_span_list_behind[loop_inner].start_pos_;
                                 possible_span.pattern_col_marks[j*2+1] = link_span_list_behind[loop_inner].end_pos_;
                             } else {
@@ -517,7 +516,7 @@ vector<Column> Parser::analyse_pattern_spec() {
             }  
         }
 
-        for (int seq = 0; seq < target_span_list.size(); seq++) {
+        for (int seq = 0; (size_t)seq < target_span_list.size(); seq++) {
             target_span_list[seq].value_ = doc_str.substr(target_span_list[seq].start_pos_, 
                 target_span_list[seq].end_pos_-target_span_list[seq].start_pos_);
         }
@@ -528,7 +527,7 @@ vector<Column> Parser::analyse_pattern_spec() {
         result_vector_of_column.push_back(group_n);
     }
 
-    for (int i = 1; i < wanted_groups.size(); i++) {
+    for (int i = 1; (size_t)i < wanted_groups.size(); i++) {
 
         // target_span_list contains the result of the linking !!!
         Column group_n;
@@ -540,7 +539,7 @@ vector<Column> Parser::analyse_pattern_spec() {
 
         if (DEBUG) cout << i << " groups need col" << wanted_groups[i].start_col_seq_ << " to " << wanted_groups[i].end_col_seq_ << endl;
 
-        for (int inner = 0 ; inner < cmp_span_list.size(); inner++) {
+        for (int inner = 0 ; (size_t)inner < cmp_span_list.size(); inner++) {
             int s_col_in_sub_span = cmp_span_list[inner].pattern_col_marks[s_col*2];
             int e_col_in_sub_span = cmp_span_list[inner].pattern_col_marks[e_col*2+1];
             Span sub_span(s_col_in_sub_span, e_col_in_sub_span, doc_str.substr(s_col_in_sub_span, e_col_in_sub_span - s_col_in_sub_span));
@@ -555,7 +554,7 @@ vector<Column> Parser::analyse_pattern_spec() {
     analyse_from_list();
 
     //orgnise in dictionary order
-    for (unsigned int i = 0; i < result_vector_of_column.size(); i++) {
+    for (unsigned int i = 0; (size_t)i < result_vector_of_column.size(); i++) {
         unsigned int choice = i;
         Column min = result_vector_of_column[i];
         for (unsigned int j = i+1; j < result_vector_of_column.size(); j++) {
@@ -757,7 +756,7 @@ vector<Column> Parser::analyse_regex_spec() {
 
         if (DEBUG) cout << "span-size --->" << source_column.get_span_list().size() << endl;
 
-        for (; span_it < source_column.get_span_list().size(); span_it++) {
+        for (; (size_t)span_it < source_column.get_span_list().size(); span_it++) {
             string str = source_column.get_span_list()[span_it].value_;
             if (DEBUG) cout << source_column.get_span_list()[span_it].value_ << endl;
             result_from_engine = findall(reg.c_str(), str.c_str());
@@ -1032,10 +1031,10 @@ Column Parser::get_column_as_regex(string reg) {
     View source_view = get_view_by_name("Document");
     Column source_column = source_view.get_column_by_name("text");
     vector<vector<int> >result_from_engine;
-    int span_length = source_column.get_span_list().size();
+    size_t span_length = source_column.get_span_list().size();
     int span_it = 0;
 
-    for (; span_it < span_length; span_it++) {
+    for (; (size_t)span_it < span_length; span_it++) {
         string str = source_column.get_span_list()[span_it].value_;
         result_from_engine = findall(reg.c_str(), str.c_str());
         //cout << "result_from_engine : " <<result_from_engine.size() << endl;
