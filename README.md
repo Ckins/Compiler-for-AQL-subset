@@ -1,8 +1,7 @@
 # README
 
----
 ## environment
-System: Ubuntu14.04LTS 64-bit
+System: Ubuntu14.04LTS 64-bit   
 Compiler: GNU g++ version 4.8.4
 
 ## examples
