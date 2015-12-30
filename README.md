@@ -4,12 +4,17 @@
 
 ## examples
 We have prepared some examples for you:
-
-+ PerLoc
++ America_2016_election_news
 ```
 aql_master/src/# make clean
 aql_master/src/# make
 aql_master/src/# make test1
+```
++ PerLoc
+```
+aql_master/src/# make clean
+aql_master/src/# make
+aql_master/src/# make test3
 ```
 + Revenue
 ```
