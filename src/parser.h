@@ -15,6 +15,14 @@
 
 using namespace std;
 
+/*
+A Detailed Document of aql_master
+
+Parser:
+    The detail of each function is described in parser.cpp
+
+*/
+
 class Parser {
   public:
     Parser(vector<CodeToken> lexer_list, const Tokenizer &t);

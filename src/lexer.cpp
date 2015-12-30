@@ -105,13 +105,15 @@ CodeToken Lexer::scan() {
 
     //recognise regex expression
     if (peek_ == '/') {
+        int dead = 0;
         string reg = "";
+        char last_char = '/';
+        readch();
         do {
-            if (peek_ != '/') {
-                reg += peek_;
-            }
+            reg += peek_;
+            last_char = peek_;
             readch();
-        } while (peek_ != '/');
+        } while (!((peek_ == '/') && (last_char != '\\')));
         peek_ = ' ';
         CodeToken reg_expr(reg, Tag::REGEX_EXPR);
         reg_expr.line_ = line_;

@@ -9,6 +9,26 @@
 
 using namespace std;
 
+/*
+Lexer:
+cut an AQL into tokens
+# static int line_                         : the No. of reading line
+# string file_                             : the name of the file
+# char peek_                               : the handling char
+# bool is_end_                             : it will be true if reaches the EOF
+# std::ifstream instream_                  : the ifstream of the file
+# map<string, CodeToken> words_            : the reserved words
+# vector<CodeToken> code_token_list_       : records all tokens of the given AQL
+
+* void readch()                            : move to the next char 
+* void reserve(CodeToken)                  : handle reserved words
+* bool is_letter(char)                     : judge whether the char is a letter
+* bool is_letter_or_num(char)              : judge whether the char is a letter or a num
+* CodeToken scan()                         : get the next token
+* vector<CodeToken> get_list()             : returns all tokens of the given AQL
+
+*/
+
 class Lexer {
 public:
     static int line_;

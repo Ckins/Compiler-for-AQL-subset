@@ -32,14 +32,14 @@ column.o : tokenizer.h column.h
 view.o : column.h view.h
 	$(CC) $(CFLAGS) view.cpp
 
-test1:
+test3:
 	./AQL PerLoc.aql PerLoc.input
 
 test2:
 	./AQL Revenue.aql Revenue.input
 
-test3:
-	./AQL 2016.aql news1.input
+test1:
+	./AQL 2016.aql folder
 
 .PHONY : clean
 clean:

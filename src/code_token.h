@@ -11,6 +11,11 @@ using namespace std;
 
 //Tag 用于区别不同的保留字，标识符，数字
 // SINGLE_TOKEN : "," ";"
+
+/*
+Tag:
+records all reserved words adn data types of the AQL
+*/
 class Tag {
 public:
     const static int
@@ -23,6 +28,20 @@ public:
 
 //默认lexme是空串,tag=-1,异常
 
+/*
+
+CodeToken:
+records the info of every token in a AQL code:
+# int tag_         : the Tag of the token
+# int line_        : the line num of the token (used in error handling)
+# int num_value_   : if the token is a num, num_value_ will record its value (while  lexme_ will be assigned "")
+# string lexme_    : if the token is a string, lexme_ will record its content (while num_value will be assigned -999)
+
+* void set(CodeToken*, CodeToken*)     : deeply copy the second para to the first
+* CodeToken& operator=(const)          : deeply copy the second para to the first (it will call methos(set))
+* string toString()                    : retrun the token in string
+
+*/
 class CodeToken {
 public:
     int tag_;
