@@ -1,6 +1,9 @@
 # README
 
 ---
+## environment
+System: Ubuntu14.04LTS 64-bit
+Compiler: GNU g++ version 4.8.4
 
 ## examples
 We have prepared some examples for you:
@@ -10,17 +13,22 @@ aql_master/src/# make clean
 aql_master/src/# make
 aql_master/src/# make test1
 ```
++ Revenue
+```
+aql_master/src/# make clean
+aql_master/src/# make
+aql_master/src/# make test2
+```
 + PerLoc
 ```
 aql_master/src/# make clean
 aql_master/src/# make
 aql_master/src/# make test3
 ```
-+ Revenue
+
++ For More information, pls view:
 ```
-aql_master/src/# make clean
-aql_master/src/# make
-aql_master/src/# make test2
+/dataset/dataset_ReadME.txt
 ```
 
 ## extras
