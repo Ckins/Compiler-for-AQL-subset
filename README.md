@@ -3,7 +3,7 @@
 
 ### What Is The AQL Subset?
 This project is not a complete Compiler of AQL, but it realizes the major part of it. The BNF grammar is listed below:
-
+```
 aql_stmt → create_stmt ; | output_stmt ;  
 create_stmt → create view ID as view_stmt  
 view_stmt → select_stmt | extract_stmt  
@@ -26,7 +26,7 @@ pattern_expr → pattern_pkg | pattern_expr pattern_pkg
 pattern_pkg → atom | atom { NUM , NUM } | pattern_group  
 atom→ < column > | < Token > | REG  
 pattern_group → ( pattern_expr )  
-
+```
 ### Lexer
 Scan the original language and output the terminator to gramma parser.
 
